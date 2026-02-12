@@ -1,0 +1,81 @@
+name: Deploy to AWS (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: 'AWS Region to deploy to'
+        required: true
+        default: 'eu-central-1'
+        type: choice
+        options:
+          - us-east-1
+          - us-west-2
+          - eu-central-1
+          - eu-west-1
+          - ap-southeast-1
+      environment:
+        description: 'Environment name'
+        required: true
+        default: 'dev'
+        type: string
+
+env:
+  NODE_VERSION: '18.x'
+
+jobs:
+  deploy:
+    name: Deploy CDK Stack
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.region }}
+
+      - name: Install CDK globally
+        run: npm install -g aws-cdk
+
+      - name: Bootstrap CDK (if needed)
+        run: |
+          # Bootstrap CDK - this is idempotent, safe to run multiple times
+          cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ inputs.region }} || echo "Bootstrap may have failed or already exists"
+        continue-on-error: true
+
+      - name: CDK Synth
+        run: cdk synth
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+          CDK_DEFAULT_REGION: ${{ inputs.region }}
+
+      - name: CDK Deploy
+        run: cdk deploy --require-approval never
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+          CDK_DEFAULT_REGION: ${{ inputs.region }}
+
+      - name: Output deployment info
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo "📍 Region: ${{ inputs.region }}"
+          echo "🏷️  Environment: ${{ inputs.environment }}"
+          echo "🔢 Account: ${{ secrets.AWS_ACCOUNT_ID }}"
+
