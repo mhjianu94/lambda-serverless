@@ -27,7 +27,8 @@ jobs:
   deploy:
     name: Deploy CDK Stack
     runs-on: ubuntu-latest
-    
+    environment: aws-mhj
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
