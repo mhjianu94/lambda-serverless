@@ -46,6 +46,9 @@ This project contains a serverless AWS Lambda function setup using AWS CDK (Clou
 │   └── lambda-serverless-stack.ts # CDK stack definition
 ├── lambda/
 │   └── handler.js                # Lambda function handler
+├── scripts/
+│   └── run-with-localstack.js    # Run CDK against LocalStack
+├── docker-compose.yml            # LocalStack for local dev
 ├── cdk.json                      # CDK configuration
 ├── tsconfig.json                 # TypeScript configuration
 ├── package.json                  # Node.js dependencies
@@ -96,6 +99,62 @@ cdk synth
 ```
 
 This generates CloudFormation templates in `cdk.out/` without deploying.
+
+## Local development with LocalStack
+
+You can run the full stack (Lambda + API Gateway) locally using [LocalStack](https://localstack.cloud/), so you can develop and test without deploying to AWS.
+
+**Prerequisites:** [Docker](https://docs.docker.com/get-docker/) and Docker Compose.
+
+1. **Start LocalStack**
+   ```bash
+   npm run localstack:up
+   ```
+   This starts LocalStack in the background on port `4566`. Wait until it is ready (about 10–20 seconds). Optional: `npm run localstack:logs` to watch logs.
+
+2. **Bootstrap CDK against LocalStack** (first time only)
+   ```bash
+   npm run build
+   npm run bootstrap:local
+   ```
+
+3. **Deploy the stack to LocalStack**
+   ```bash
+   npm run deploy:local
+   ```
+   CDK will print an AWS-style URL; when using LocalStack, use this form instead (replace `<api-id>` with the REST API id from the deploy output or from `localstack:logs`):
+   `http://localhost:4566/restapis/<api-id>/dev/_user_request_/hello`
+
+4. **Call your API locally**
+   ```bash
+   # Replace <api-id> with the ID from the deploy output
+   curl http://localhost:4566/restapis/<api-id>/dev/_user_request_/hello
+   curl -X POST http://localhost:4566/restapis/<api-id>/dev/_user_request_/hello \
+     -H "Content-Type: application/json" \
+     -d '{"test": "data"}'
+   ```
+
+5. **Stop LocalStack when finished**
+   ```bash
+   npm run localstack:down
+   ```
+
+**Scripts:**
+
+| Script | Description |
+|--------|-------------|
+| `npm run localstack:up` | Start LocalStack (Docker) |
+| `npm run localstack:down` | Stop LocalStack |
+| `npm run localstack:logs` | Stream LocalStack logs |
+| `npm run bootstrap:local` | Bootstrap CDK for LocalStack (first time) |
+| `npm run deploy:local` | Deploy stack to LocalStack |
+| `npm run destroy:local` | Tear down stack in LocalStack |
+
+To use a different LocalStack endpoint (e.g. custom port), set `LOCALSTACK_ENDPOINT` before running bootstrap/deploy:
+
+```bash
+LOCALSTACK_ENDPOINT=http://localhost:4567 npm run deploy:local
+```
 
 ## GitHub Actions Deployment
 

@@ -1,0 +1,24 @@
+# LocalStack for local AWS emulation (Lambda, API Gateway, CloudFormation, S3, IAM, etc.)
+# Start with: npm run localstack:up
+# Then: npm run bootstrap:local (first time only), npm run deploy:local
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: lambda-serverless-localstack
+    ports:
+      - "4566:4566"            # LocalStack gateway
+      - "4510-4559:4510-4559"  # External services port range
+    environment:
+      - SERVICES=cloudformation,s3,iam,lambda,apigateway,logs,ssm
+      - DEBUG=0
+      - PERSISTENCE=0
+      - LAMBDA_RUNTIME_ENVIRONMENT_TIMEOUT=60
+    volumes:
+      - "./localstack-data:/var/lib/localstack"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s

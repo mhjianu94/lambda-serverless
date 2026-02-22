@@ -10,7 +10,11 @@
     "deploy": "cdk deploy",
     "destroy": "cdk destroy",
     "synth": "cdk synth",
-    "diff": "cdk diff"
+    "diff": "cdk diff",
+    "localstack:logs": "docker compose logs -f localstack",
+    "bootstrap:local": "node scripts/run-with-localstack.js bootstrap",
+    "deploy:local": "node scripts/run-with-localstack.js deploy --require-approval never",
+    "destroy:local": "node scripts/run-with-localstack.js destroy --force"
   },
   "keywords": [
     "aws",
