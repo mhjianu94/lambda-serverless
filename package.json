@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "test:build": "cd infrastructure && npm run build && npm run synth",
+    "build": "cd infrastructure && npm run build",
     "setup": "docker compose up -d && echo 'Starting LocalStack...' && sleep 20 && (node scripts/run-with-localstack.js setup-hosts || true) && echo 'Bootstrap LocalStack...' && cd infrastructure && node ../scripts/run-with-localstack.js bootstrap",
     "dev": "(cd infrastructure && node ../scripts/run-with-localstack.js deploy --all --require-approval never 2>&1) | tee .localstack-deploy.log && node scripts/echo-localstack-urls.js .localstack-deploy.log && docker compose logs -f localstack",
     "localstack:setup-hosts": "node scripts/run-with-localstack.js setup-hosts",
