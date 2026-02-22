@@ -1,9 +1,7 @@
 
 module.exports.hello = async (event, context) => {
   const body = {
-    message: "Hello from AWS Lambda!",
-    stage: process.env.STAGE || "unknown",
-    input: event
+    message: "Hello from AWS Lambda! ",
   };
 
   const response = {
@@ -21,8 +19,6 @@ module.exports.hello = async (event, context) => {
 module.exports.auth = async (event, context) => {
   const body = {
     message: "Auth from AWS Lambda!",
-    stage: process.env.STAGE || "unknown",
-    input: event
   };
 
   const response = {

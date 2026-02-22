@@ -12,7 +12,9 @@ export class AuthStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: AuthStackProps) {
     super(scope, id, props);
 
-    const lambdaCodePath = path.join(process.cwd(), '..', 'server', 'lambda');
+    const lambdaCodePath = process.env.LAMBDA_CODE_PATH
+      ? path.join(process.cwd(), '..', process.env.LAMBDA_CODE_PATH)
+      : path.join(process.cwd(), '..', 'server', 'lambda');
     const stage = props?.stage ?? 'dev';
 
     const authFunction = new AuthFunction(this, 'AuthFunction', {

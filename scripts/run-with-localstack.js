@@ -101,6 +101,8 @@ async function main() {
     // Let cdklocal set AWS_ENDPOINT_URL / AWS_ENDPOINT_URL_S3 so it can use path-style S3 (avoids LocalStack "invalid XML").
     delete process.env.AWS_ENDPOINT_URL;
     delete process.env.AWS_ENDPOINT_URL_S3;
+    // Mount Lambda code from host path so LocalStack hot-reloads without redeploy (path must be absolute on host).
+    process.env.LAMBDA_MOUNT_CODE = '1';
     const resolves = await checkHostsForDeploy();
     if (!resolves) {
       printHostsInstruction();

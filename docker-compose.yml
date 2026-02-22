@@ -14,6 +14,8 @@ services:
       - DEBUG=0
       - PERSISTENCE=0
       - LAMBDA_RUNTIME_ENVIRONMENT_TIMEOUT=60
+      # Use polling so Lambda hot-reload detects file changes (needed on WSL2/Docker when inotify doesn't work on bind mounts)
+      - LAMBDA_DOCKER_FLAGS=-e LOCALSTACK_FILE_WATCHER_STRATEGY=polling
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"  # Required for Lambda (LocalStack runs functions in containers via host Docker)
       - "./localstack-data:/var/lib/localstack"
