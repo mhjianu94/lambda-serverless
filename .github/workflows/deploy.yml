@@ -9,7 +9,7 @@ on:
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
-  NODE_VERSION: '18.x'
+  NODE_VERSION: '20.x'
 
 jobs:
   deploy:
@@ -60,7 +60,7 @@ jobs:
           CDK_DEFAULT_REGION: ${{ env.AWS_REGION }}
 
       - name: CDK Deploy
-        run: cd infrastructure && cdk deploy --require-approval never
+        run: cd infrastructure && cdk deploy --all --require-approval never
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
           CDK_DEFAULT_REGION: ${{ env.AWS_REGION }}
