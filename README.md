@@ -44,7 +44,9 @@ This project contains a serverless AWS Lambda function setup using AWS CDK (Clou
 │   ├── bin/
 │   │   └── app.ts               # CDK app entry point
 │   ├── lib/
-│   │   └── lambda-serverless-stack.ts
+│   │   ├── api/                 # API Gateway constructs
+│   │   ├── lambdas/             # Lambda constructs
+│   │   └── stacks/             # HelloStack, AuthStack
 │   ├── cdk.json
 │   ├── tsconfig.json
 │   └── package.json             # CDK dependencies
@@ -276,16 +278,14 @@ cdk destroy
 
 ## Configuration
 
-### Modify the Stack
+### Modify the Stacks
 
-Edit `infrastructure/lib/lambda-serverless-stack.ts` to:
-- Change Lambda function configuration (memory, timeout, environment variables)
-- Add more API Gateway resources and methods
-- Add additional AWS resources (S3, DynamoDB, SQS, SNS, etc.)
-- Configure IAM roles and policies
-- Set up VPC configurations
-- Add custom domain names
-- Configure API Gateway authorizers
+There are two stacks: **HelloStack** (hello Lambda + /hello API) and **AuthStack** (auth Lambda + /auth API).
+
+- **HelloStack**: `infrastructure/lib/stacks/hello-stack.ts` and `lib/lambdas/hello-function.ts`, `lib/api/hello-api.ts`
+- **AuthStack**: `infrastructure/lib/stacks/auth-stack.ts` and `lib/lambdas/auth.ts`, `lib/api/auth-api.ts`
+
+Edit these to change Lambda configuration (memory, timeout, env vars), add API routes, or add resources (S3, DynamoDB, etc.). Deploy both with `npm run deploy` or one stack with `cdk deploy HelloStack` or `cdk deploy AuthStack`.
 
 ### Change AWS Region/Account
 

@@ -3,7 +3,8 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as cdk from 'aws-cdk-lib';
-import { LambdaServerlessStack } from '../lib/lambda-serverless-stack';
+import { HelloStack } from '../lib/stacks/hello-stack';
+import { AuthStack } from '../lib/stacks/auth-stack';
 
 const projectRoot = fs.existsSync(path.join(__dirname, '../../.env'))
   ? path.join(__dirname, '../..')
@@ -28,10 +29,14 @@ if (process.env.CDK_DEBUG || envResult.error) {
 
 const app = new cdk.App();
 
-new LambdaServerlessStack(app, 'LambdaServerlessStack', {
-  env: {
-    account: account,
-    region: region,
-  },
-  description: 'Serverless Lambda with API Gateway and other AWS resources',
+const stackEnv = { account, region };
+
+new HelloStack(app, 'HelloStack', {
+  env: stackEnv,
+  description: 'Hello Lambda and API Gateway',
+});
+
+new AuthStack(app, 'AuthStack', {
+  env: stackEnv,
+  description: 'Auth Lambda and API Gateway',
 });

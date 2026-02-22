@@ -2,20 +2,20 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import type { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 
-export interface HelloApiProps {
-  readonly helloFunction: IFunction;
+export interface AuthApiProps {
+  readonly authFunction: IFunction;
   readonly stageName?: string;
 }
 
-export class HelloApi extends Construct {
+export class AuthApi extends Construct {
   readonly api: apigateway.RestApi;
 
-  constructor(scope: Construct, id: string, props: HelloApiProps) {
+  constructor(scope: Construct, id: string, props: AuthApiProps) {
     super(scope, id);
 
     this.api = new apigateway.RestApi(this, 'RestApi', {
-      restApiName: 'Hello Service',
-      description: 'API Gateway for Hello Lambda function',
+      restApiName: 'Auth Service',
+      description: 'API Gateway for Auth Lambda function',
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
@@ -28,12 +28,11 @@ export class HelloApi extends Construct {
       },
     });
 
-    const helloIntegration = new apigateway.LambdaIntegration(props.helloFunction, {
+    const authIntegration = new apigateway.LambdaIntegration(props.authFunction, {
       requestTemplates: { 'application/json': '{ "statusCode": "200" }' },
     });
 
-    const helloResource = this.api.root.addResource('hello');
-    helloResource.addMethod('GET', helloIntegration);
-    helloResource.addMethod('POST', helloIntegration);
+    const authResource = this.api.root.addResource('auth');
+    authResource.addMethod('POST', authIntegration);
   }
 }
