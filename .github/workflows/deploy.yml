@@ -16,6 +16,8 @@ jobs:
     name: Deploy CDK Stack
     runs-on: ubuntu-latest
     environment: aws-mhj
+    # Only deploy on push when commit message contains [deploy]; always run when triggered manually
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy]')
 
     steps:
       - name: Checkout code
