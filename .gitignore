@@ -28,4 +28,5 @@ Thumbs.db
 
 # LocalStack
 localstack-data/
+.localstack-deploy.log
 
