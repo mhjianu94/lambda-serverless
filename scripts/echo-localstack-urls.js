@@ -1,6 +1,6 @@
 const { CloudFormationClient, DescribeStacksCommand } = require('@aws-sdk/client-cloudformation');
 
-const endpoint = process.env.LOCALSTACK_ENDPOINT || process.env.AWS_ENDPOINT_URL || 'http://localhost:4566';
+const endpoint = process.env.LOCALSTACK_ENDPOINT || process.env.AWS_ENDPOINT_URL || 'http://127.0.0.1:4566';
 const region = process.env.LOCALSTACK_REGION || process.env.AWS_REGION || process.env.CDK_DEFAULT_REGION || 'us-east-1';
 
 const client = new CloudFormationClient({
@@ -13,11 +13,25 @@ const client = new CloudFormationClient({
   forcePathStyle: true,
 });
 
+function getOutputs(stacks) {
+  const out = [];
+  for (const s of stacks || []) {
+    const outputs = s.Outputs || s.outputs || [];
+    for (const o of outputs) {
+      const key = o.OutputKey || o.outputKey;
+      const value = o.OutputValue ?? o.outputValue;
+      if (key && value) out.push({ Key: key, Value: value });
+    }
+  }
+  return out;
+}
+
 async function main() {
   try {
     const out = await client.send(new DescribeStacksCommand({}));
-    const outputs = (out.Stacks || []).flatMap((s) => (s.Outputs || []).map((o) => ({ Key: o.OutputKey, Value: o.OutputValue })));
-    const apiUrls = outputs.filter((o) => o.Key && o.Key.includes('ApiUrl') && o.Value);
+    const stacks = out.Stacks || out.stacks || [];
+    const outputs = getOutputs(stacks);
+    const apiUrls = outputs.filter((o) => String(o.Key).includes('ApiUrl') && o.Value);
     if (apiUrls.length === 0) {
       console.log('No API URLs found. Deploy first: npm run setup (once), then npm run dev');
       return;
@@ -31,4 +45,7 @@ async function main() {
   }
 }
 
-main();
+main().catch((e) => {
+  console.error('Failed to get stack outputs:', e.message);
+  process.exit(1);
+});
