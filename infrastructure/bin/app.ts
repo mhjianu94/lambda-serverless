@@ -33,6 +33,7 @@ if (process.env.CDK_DEBUG || envResult.error) {
 const app = new cdk.App();
 
 const stackEnv = { account, region };
+const useLocalStack = !!process.env.AWS_ENDPOINT_URL;
 
 new HelloService(app, 'HelloService', {
   env: stackEnv,
@@ -44,21 +45,23 @@ new AuthService(app, 'AuthService', {
   description: 'Auth Lambda and API Gateway',
 });
 
-const vpcStack = new VpcService(app, 'VpcService', {
-  env: stackEnv,
-  description: 'VPC and networking for RDS and Lambda',
-});
+if (!useLocalStack) {
+  const vpcStack = new VpcService(app, 'VpcService', {
+    env: stackEnv,
+    description: 'VPC and networking for RDS and Lambda',
+  });
 
-const databaseStack = new DatabaseService(app, 'DatabaseService', {
-  env: stackEnv,
-  description: 'RDS PostgreSQL, Secrets Manager, and RDS Proxy',
-  vpc: vpcStack.vpc,
-  lambdaSecurityGroup: vpcStack.lambdaSecurityGroup,
-});
+  const databaseStack = new DatabaseService(app, 'DatabaseService', {
+    env: stackEnv,
+    description: 'RDS PostgreSQL, Secrets Manager, and RDS Proxy',
+    vpc: vpcStack.vpc,
+    lambdaSecurityGroup: vpcStack.lambdaSecurityGroup,
+  });
 
-new ApiDbService(app, 'ApiDbService', {
-  env: stackEnv,
-  description: 'Lambda in VPC and API Gateway (DB via RDS Proxy)',
-  vpcStack,
-  databaseStack,
-});
+  new ApiDbService(app, 'ApiDbService', {
+    env: stackEnv,
+    description: 'Lambda in VPC and API Gateway (DB via RDS Proxy)',
+    vpcStack,
+    databaseStack,
+  });
+}

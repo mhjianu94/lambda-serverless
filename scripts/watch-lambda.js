@@ -1,5 +1,5 @@
 const path = require('path');
-const { spawn } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 const chokidar = require('chokidar');
 
 const repoRoot = path.resolve(__dirname, '..');
@@ -29,6 +29,7 @@ const watcher = chokidar.watch(serverDir, {
 });
 watcher.on('ready', () => {
   console.log('Watching server/ source files (build only, no deploy). Ignoring node_modules and dist.');
+  spawnSync('node', ['scripts/echo-localstack-urls.js'], { cwd: repoRoot, stdio: 'inherit' });
 });
 watcher.on('change', (p) => scheduleBuild(path.relative(repoRoot, p)));
 watcher.on('add', (p) => scheduleBuild(path.relative(repoRoot, p)));

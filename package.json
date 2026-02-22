@@ -12,7 +12,8 @@
     "dev:watch": "node scripts/dev-watch.js",
     "watch": "node scripts/watch-lambda.js",
     "watch:deploy": "node scripts/watch-lambda-redeploy.js",
-    "destroy": "node scripts/run-with-localstack.js cdklocal destroy --all --force && docker compose down"
+    "destroy": "node scripts/run-with-localstack.js cdklocal destroy --all --force && docker compose down",
+    "reset": "npm run destroy && npm run setup && npm run dev"
   },
   "keywords": [
     "aws",

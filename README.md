@@ -14,7 +14,9 @@ Run the app locally against [LocalStack](https://localstack.cloud/) with optiona
    npm run setup
    ```
 
-   This runs `docker compose up -d`, waits for LocalStack health, then `cdklocal bootstrap`. Re-run if deploy fails due to hosts or bootstrap.
+   This runs `docker compose up -d`, waits for LocalStack health, then `cdklocal bootstrap`. Re-run if deploy fails (e.g. after an endpoint change). Endpoints use `127.0.0.1` by default so no `/etc/hosts` changes are required.
+
+LocalStack runs **Hello** and **Auth** only (no VPC, RDS, or DB-backed API). For the full stack including RDS and ApiDb, deploy to real AWS.
 
 ### Deploy and run
 
@@ -44,6 +46,10 @@ Optional overrides (e.g. in `.env`, not committed):
 - `LOCALSTACK_ENDPOINT` – default `http://localhost:4566`
 - `LOCALSTACK_REGION` / `CDK_DEFAULT_REGION` – default `us-east-1`
 - `LOCALSTACK_HOT_RELOAD=1` – enables mount-based hot reload (set automatically by `npm run dev` and `npm run dev:watch`)
+
+### Troubleshooting
+
+- **`getaddrinfo ENOTFOUND ... s3.localhost`** – The bootstrap stack was created with a hostname that doesn’t resolve. Re-bootstrap using `127.0.0.1`: run `npm run destroy`, then `npm run setup`, then `npm run dev`.
 
 ### Tear down
 

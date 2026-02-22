@@ -4,8 +4,10 @@ const { spawnSync } = require('child_process');
 
 const repoRoot = path.resolve(__dirname, '..');
 const distLambda = path.join(repoRoot, 'dist', 'lambda');
-const endpoint = process.env.LOCALSTACK_ENDPOINT || 'http://localhost:4566';
-const endpointS3 = process.env.AWS_ENDPOINT_URL_S3 || (endpoint.includes('localhost') ? endpoint.replace('localhost', 's3.localhost') : endpoint.replace('://', '://s3.'));
+const rawEndpoint = process.env.LOCALSTACK_ENDPOINT || 'http://localhost:4566';
+const useLocalhost = rawEndpoint.includes('localhost') || rawEndpoint.includes('127.0.0.1');
+const endpoint = useLocalhost ? rawEndpoint.replace(/localhost/, '127.0.0.1') : rawEndpoint;
+const endpointS3 = process.env.AWS_ENDPOINT_URL_S3 || (useLocalhost ? endpoint : (rawEndpoint.includes('localhost') ? rawEndpoint.replace('localhost', 's3.localhost') : rawEndpoint.replace('://', '://s3.')));
 const region = process.env.LOCALSTACK_REGION || process.env.CDK_DEFAULT_REGION || 'us-east-1';
 const useHotReload = process.env.LOCALSTACK_HOT_RELOAD !== undefined && process.env.LOCALSTACK_HOT_RELOAD !== '0';
 const hotReloadPath = process.env.LAMBDA_HOT_RELOAD_PATH || '/opt/project/dist/lambda';

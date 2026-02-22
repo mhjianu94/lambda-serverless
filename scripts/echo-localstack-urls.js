@@ -19,12 +19,12 @@ async function main() {
     const outputs = (out.Stacks || []).flatMap((s) => (s.Outputs || []).map((o) => ({ Key: o.OutputKey, Value: o.OutputValue })));
     const apiUrls = outputs.filter((o) => o.Key && o.Key.includes('ApiUrl') && o.Value);
     if (apiUrls.length === 0) {
-      console.log('No stack outputs with ApiUrl found. Deploy may still be in progress.');
+      console.log('No API URLs found. Deploy first: npm run setup (once), then npm run dev');
       return;
     }
-    console.log('\nLocalStack API URLs:');
+    console.log('\n--- API endpoints (test with curl or your HTTP client) ---');
     apiUrls.forEach(({ Key, Value }) => console.log(`  ${Key}: ${Value}`));
-    console.log('');
+    console.log('---\n');
   } catch (e) {
     console.error('Failed to get stack outputs:', e.message);
     process.exit(1);

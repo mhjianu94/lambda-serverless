@@ -19,6 +19,9 @@ export interface DbBackedFunctionProps {
   readonly description?: string;
 }
 
+const useLocalStack = !!process.env.AWS_ENDPOINT_URL;
+const lambdaSubnetType = useLocalStack ? ec2.SubnetType.PRIVATE_ISOLATED : ec2.SubnetType.PRIVATE_WITH_EGRESS;
+
 export class DbBackedFunction extends Construct {
   readonly function: lambda.Function;
   readonly logGroup: logs.LogGroup;
@@ -43,7 +46,7 @@ export class DbBackedFunction extends Construct {
       memorySize: props.memorySize ?? 512,
       timeout: props.timeout ?? cdk.Duration.seconds(30),
       vpc: props.vpc,
-      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      vpcSubnets: { subnetType: lambdaSubnetType },
       securityGroups: props.securityGroups,
       environment: {
         STAGE: props.stage ?? 'dev',
