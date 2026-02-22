@@ -6,7 +6,13 @@
   "scripts": {
     "test:build": "cd infrastructure && npm run build && npm run synth",
     "build": "cd infrastructure && npm run build",
-    "build:lambda": "node scripts/build-lambda.js"
+    "build:lambda": "node scripts/build-lambda.js",
+    "setup": "node scripts/setup.js",
+    "dev": "node scripts/dev.js",
+    "dev:watch": "node scripts/dev-watch.js",
+    "watch": "node scripts/watch-lambda.js",
+    "watch:deploy": "node scripts/watch-lambda-redeploy.js",
+    "destroy": "node scripts/run-with-localstack.js cdklocal destroy --all --force && docker compose down"
   },
   "keywords": [
     "aws",
@@ -16,6 +22,10 @@
   ],
   "license": "ISC",
   "devDependencies": {
+    "@aws-sdk/client-cloudformation": "^3.0.0",
     "aws-cdk": "^2.100.0",
-    "aws-cdk-local": "^3.0.0"
-  }}
+    "aws-cdk-local": "^3.0.0",
+    "chokidar": "^3.6.0",
+    "rimraf": "^6.0.0"
+  }
+}

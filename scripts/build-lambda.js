@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const { execSync } = require('child_process');
+const { execSync, spawnSync } = require('child_process');
 
 const repoRoot = path.resolve(__dirname, '..');
 const serverDir = path.join(repoRoot, 'server');
@@ -8,9 +8,13 @@ const distLambda = path.join(repoRoot, 'dist', 'lambda');
 const serverDist = path.join(serverDir, 'dist');
 const serverNodeModules = path.join(serverDir, 'node_modules');
 
-function rimraf(dir) {
-  if (fs.existsSync(dir)) {
-    fs.rmSync(dir, { recursive: true });
+function removeDir(dir) {
+  if (!fs.existsSync(dir)) return;
+  if (process.platform === 'win32') {
+    const { rimrafSync } = require('rimraf');
+    rimrafSync(dir);
+  } else {
+    spawnSync('rm', ['-rf', dir], { cwd: repoRoot, stdio: 'ignore' });
   }
 }
 
@@ -41,14 +45,14 @@ console.log('Installing server dependencies...');
 execSync('npm install', { cwd: serverDir, stdio: 'inherit' });
 
 console.log('Building server (TypeScript)...');
-execSync('npm run build', { cwd: serverDir, stdio: 'inherit' });
+execSync('npx tsc', { cwd: serverDir, stdio: 'inherit' });
 
 if (!fs.existsSync(serverDist)) {
   console.error('server/dist not found after build');
   process.exit(1);
 }
 
-rimraf(distLambda);
+removeDir(distLambda);
 fs.mkdirSync(distLambda, { recursive: true });
 copyRecursive(serverDist, distLambda);
 

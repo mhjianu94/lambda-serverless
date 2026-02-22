@@ -10,7 +10,7 @@ services:
       - "4566:4566"            # LocalStack gateway
       - "4510-4559:4510-4559"  # External services port range
     environment:
-      - SERVICES=cloudformation,s3,iam,lambda,apigateway,logs,ssm
+      - SERVICES=cloudformation,s3,iam,lambda,apigateway,logs,ssm,ec2
       - DEBUG=0
       - PERSISTENCE=0
       - LAMBDA_RUNTIME_ENVIRONMENT_TIMEOUT=60
