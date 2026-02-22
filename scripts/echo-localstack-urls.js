@@ -13,9 +13,13 @@ function parseDeployOutput(text) {
     const apiId = url.match(/https:\/\/([^.]+)\.execute-api/)?.[1];
     if (!apiId) continue;
     if (!byStack[stackName]) {
+      const path = stackName === 'HelloStack' ? 'hello' : 'auth';
+      const baseUrl = `${LOCALSTACK_ENDPOINT}/restapis/${apiId}/dev/_user_request_`;
       byStack[stackName] = {
         name: stackName === 'HelloStack' ? 'Hello' : 'Auth',
-        baseUrl: `${LOCALSTACK_ENDPOINT}/restapis/${apiId}/dev/_user_request_`,
+        baseUrl,
+        path,
+        url: `${baseUrl}/${path}`,
       };
     }
   }
@@ -27,9 +31,14 @@ function printUrls(items) {
     console.log('\nNo API URLs found in deploy output.\n');
     return;
   }
-  console.log('\n--- LocalStack base URLs ---');
+  console.log('\n--- LocalStack API URLs ---');
   items.forEach((api) => {
-    console.log(`${api.name}: ${api.baseUrl}`);
+    console.log(`${api.name}: ${api.url}`);
+    if (api.name === 'Hello') {
+      console.log('  (GET or POST)');
+    } else {
+      console.log('  (POST)');
+    }
   });
   console.log('----------------------------\n');
 }
