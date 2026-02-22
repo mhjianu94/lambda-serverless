@@ -5,6 +5,9 @@ import * as fs from 'fs';
 import * as cdk from 'aws-cdk-lib';
 import { HelloStack } from '../lib/stacks/hello-stack';
 import { AuthStack } from '../lib/stacks/auth-stack';
+import { VpcStack } from '../lib/stacks/vpc-stack';
+import { DatabaseStack } from '../lib/stacks/database-stack';
+import { ApiDbStack } from '../lib/stacks/api-db-stack';
 
 const projectRoot = fs.existsSync(path.join(__dirname, '../../.env'))
   ? path.join(__dirname, '../..')
@@ -39,4 +42,23 @@ new HelloStack(app, 'HelloStack', {
 new AuthStack(app, 'AuthStack', {
   env: stackEnv,
   description: 'Auth Lambda and API Gateway',
+});
+
+const vpcStack = new VpcStack(app, 'VpcStack', {
+  env: stackEnv,
+  description: 'VPC and networking for RDS and Lambda',
+});
+
+const databaseStack = new DatabaseStack(app, 'DatabaseStack', {
+  env: stackEnv,
+  description: 'RDS PostgreSQL, Secrets Manager, and RDS Proxy',
+  vpc: vpcStack.vpc,
+  lambdaSecurityGroup: vpcStack.lambdaSecurityGroup,
+});
+
+new ApiDbStack(app, 'ApiDbStack', {
+  env: stackEnv,
+  description: 'Lambda in VPC and API Gateway (DB via RDS Proxy)',
+  vpcStack,
+  databaseStack,
 });
