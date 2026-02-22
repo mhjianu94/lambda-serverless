@@ -13,16 +13,9 @@ export interface AuthFuncionProps {
 
 export class AuthFunction extends Construct {
   readonly function: lambda.Function;
-  readonly logGroup: logs.LogGroup;
 
   constructor(scope: Construct, id: string, props: AuthFuncionProps) {
     super(scope, id);
-
-    this.logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: '/aws/lambda/auth-function',
-      retention: logs.RetentionDays.ONE_WEEK,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
 
     this.function = new lambda.Function(this, 'Function', {
       runtime: lambda.Runtime.NODEJS_18_X,
@@ -34,7 +27,7 @@ export class AuthFunction extends Construct {
       environment: {
         STAGE: props.stage ?? 'dev',
       },
-      logGroup: this.logGroup,
+      logRetention: logs.RetentionDays.ONE_WEEK,
     });
   }
 }
