@@ -70,7 +70,7 @@ jobs:
           CDK_DEFAULT_REGION: ${{ inputs.region }}
 
       - name: CDK Deploy
-        run: cd infrastructure && cdk deploy --require-approval never
+        run: cd infrastructure && cdk deploy --all --require-approval never
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
           CDK_DEFAULT_REGION: ${{ inputs.region }}
