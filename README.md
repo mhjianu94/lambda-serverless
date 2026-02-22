@@ -40,29 +40,33 @@ This project contains a serverless AWS Lambda function setup using AWS CDK (Clou
 │   └── workflows/
 │       ├── deploy.yml            # Automatic deployment workflow
 │       └── deploy-manual.yml     # Manual deployment workflow
-├── bin/
-│   └── app.ts                    # CDK app entry point
-├── lib/
-│   └── lambda-serverless-stack.ts # CDK stack definition
-├── lambda/
-│   └── handler.js                # Lambda function handler
+├── infrastructure/               # CDK app and stack definitions
+│   ├── bin/
+│   │   └── app.ts               # CDK app entry point
+│   ├── lib/
+│   │   └── lambda-serverless-stack.ts
+│   ├── cdk.json
+│   ├── tsconfig.json
+│   └── package.json             # CDK dependencies
+├── server/                       # Application and Lambda handlers
+│   └── lambda/
+│       └── handler.js            # Lambda function handler
 ├── scripts/
-│   └── run-with-localstack.js    # Run CDK against LocalStack
+│   └── run-with-localstack.js   # Run CDK against LocalStack
 ├── docker-compose.yml            # LocalStack for local dev
-├── cdk.json                      # CDK configuration
-├── tsconfig.json                 # TypeScript configuration
-├── package.json                  # Node.js dependencies
-└── README.md                     # This file
+├── package.json                  # Root scripts (delegates to infrastructure)
+└── README.md
 ```
 
 ## Setup
 
-1. **Install dependencies**
+1. **Install dependencies** (root and infrastructure)
    ```bash
    npm install
+   cd infrastructure && npm install && cd ..
    ```
 
-2. **Compile TypeScript**
+2. **Compile TypeScript** (builds infrastructure)
    ```bash
    npm run build
    ```
@@ -274,7 +278,7 @@ cdk destroy
 
 ### Modify the Stack
 
-Edit `lib/lambda-serverless-stack.ts` to:
+Edit `infrastructure/lib/lambda-serverless-stack.ts` to:
 - Change Lambda function configuration (memory, timeout, environment variables)
 - Add more API Gateway resources and methods
 - Add additional AWS resources (S3, DynamoDB, SQS, SNS, etc.)
@@ -285,7 +289,7 @@ Edit `lib/lambda-serverless-stack.ts` to:
 
 ### Change AWS Region/Account
 
-Edit `bin/app.ts` to modify the stack environment:
+Edit `infrastructure/bin/app.ts` to modify the stack environment:
 
 ```typescript
 env: {

@@ -1,13 +1,7 @@
-#!/usr/bin/env node
-/**
- * Runs CDK commands with LocalStack endpoint and test credentials.
- * Usage: node scripts/run-with-localstack.js <cdk-command> [args...]
- * Example: node scripts/run-with-localstack.js deploy --require-approval never
- */
+
 
 const LOCALSTACK_ENDPOINT = process.env.LOCALSTACK_ENDPOINT || 'http://localhost:4566';
 
-// LocalStack single gateway; set S3 endpoint for CDK 2.177+ compatibility.
 Object.assign(process.env, {
   AWS_ACCESS_KEY_ID: 'test',
   AWS_SECRET_ACCESS_KEY: 'test',

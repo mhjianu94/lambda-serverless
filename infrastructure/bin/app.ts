@@ -35,4 +35,3 @@ new LambdaServerlessStack(app, 'LambdaServerlessStack', {
   },
   description: 'Serverless Lambda with API Gateway and other AWS resources',
 });
-

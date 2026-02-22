@@ -1,10 +1,4 @@
-/**
- * Lambda function handler that returns a greeting message.
- * 
- * @param {Object} event - API Gateway event object
- * @param {Object} context - Lambda context object
- * @returns {Object} API Gateway response object
- */
+
 module.exports.hello = async (event, context) => {
   const body = {
     message: "Hello from AWS Lambda!",
@@ -23,4 +17,3 @@ module.exports.hello = async (event, context) => {
 
   return response;
 };
-

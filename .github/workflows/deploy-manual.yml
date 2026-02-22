@@ -40,7 +40,9 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          cd infrastructure && npm ci && cd ..
 
       - name: Build TypeScript
         run: npm run build
@@ -62,13 +64,13 @@ jobs:
         continue-on-error: true
 
       - name: CDK Synth
-        run: cdk synth
+        run: cd infrastructure && cdk synth
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
           CDK_DEFAULT_REGION: ${{ inputs.region }}
 
       - name: CDK Deploy
-        run: cdk deploy --require-approval never
+        run: cd infrastructure && cdk deploy --require-approval never
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
           CDK_DEFAULT_REGION: ${{ inputs.region }}
