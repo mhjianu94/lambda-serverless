@@ -5,7 +5,6 @@ import {
   GetSecretValueCommand,
 } from '@aws-sdk/client-secrets-manager';
 import { User } from './entity/User';
-import { CreateUsersTable1730000000000 } from './migrations/CreateUsersTable1730000000000';
 
 let dataSourcePromise: Promise<DataSource> | null = null;
 
@@ -57,7 +56,7 @@ export async function getDataSource(): Promise<DataSource> {
     username,
     password,
     entities: [User],
-    migrations: [CreateUsersTable1730000000000],
+    migrations: [],
     migrationsTableName: 'typeorm_migrations',
     synchronize: false,
     logging: false,

@@ -4,7 +4,7 @@ export async function runMigrations(): Promise<{ success: boolean; message: stri
   try {
     const ds = await getDataSource();
     await ds.runMigrations();
-    await ds.destroy();
+    await ds.destroy(); 
     return { success: true, message: 'Migrations completed successfully' };
   } catch (err) {
     console.error('Migration error:', err);

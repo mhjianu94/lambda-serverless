@@ -11,7 +11,7 @@ This rule applies when writing or changing anything related to **local developme
 ## Scope
 
 - **LocalStack**: AWS emulation via Docker; used for running CDK deploy and Lambda locally without real AWS.
-- **Scripts**: `scripts/run-with-localstack.js` (env + cdklocal), `scripts/echo-localstack-urls.js`, `scripts/watch-lambda*.js`, `scripts/build-lambda.js`.
+- **Scripts**: `scripts/run-with-localstack.js` (env + cdklocal), `scripts/echo-localstack-urls.js`, `scripts/dev.js`, `scripts/watch-lambda.js`, `scripts/watch-lambda-redeploy.js`, `scripts/build-lambda.js`.
 - **Docker**: `docker-compose.yml` defines the LocalStack service (port 4566, required services, persistence, Lambda file watcher).
 - **Env**: `EDGE_PORT`, `LOCALSTACK_REGION`, `LOCALSTACK_ENDPOINT`, `AWS_ENDPOINT_URL`, `CDK_DEFAULT_ACCOUNT`/`CDK_DEFAULT_REGION` when using LocalStack.
 
@@ -27,6 +27,7 @@ This rule applies when writing or changing anything related to **local developme
 ```text
 scripts/
   build-lambda.js
+  dev.js
   echo-localstack-urls.js
   run-with-localstack.js
   watch-lambda.js
@@ -36,8 +37,11 @@ docker-compose.yml
 
 ## Commands (reference)
 
-- `npm run localstack:setup-hosts` – add LocalStack hosts to `/etc/hosts`.
-- `npm run dev` – deploy to LocalStack and print API URLs (after `npm run build` and optionally `npm run bootstrap:local` once).
+- `npm run setup` – one-time: start LocalStack (Docker), configure hosts, bootstrap CDK. Run first; re-run to fix hosts if deploy fails.
+- `npm run dev` – deploy to LocalStack and print API URLs.
+- `npm run dev:watch` – build lambda, start watch in background, then deploy once.
+- `npm run watch` – build lambda on save only.
+- `npm run watch:deploy` – build + deploy on save only.
 - `npm run destroy` – tear down LocalStack stacks and stop Docker.
 
 When you add or change scripts, docker-compose, or env usage for local/LocalStack, update the structure tree above and any README or this rule if the workflow changes.

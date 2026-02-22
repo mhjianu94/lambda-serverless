@@ -5,20 +5,16 @@
   "private": true,
   "scripts": {
     "test:build": "cd infrastructure && npm run build && npm run synth",
-    "build": "cd infrastructure && npm run build",
-    "setup": "docker compose up -d && echo 'Starting LocalStack...' && sleep 20 && (node scripts/run-with-localstack.js setup-hosts || true) && echo 'Bootstrap LocalStack...' && cd infrastructure && node ../scripts/run-with-localstack.js bootstrap",
-    "dev": "(cd infrastructure && node ../scripts/run-with-localstack.js deploy --all --require-approval never 2>&1) | tee .localstack-deploy.log && node scripts/echo-localstack-urls.js .localstack-deploy.log",
-    "dev:watch": "npm run build:lambda && (npm run watch:lambda &) && LAMBDA_CODE_PATH=dist/lambda npm run dev",
-    "build:lambda": "node scripts/build-lambda.js",
-    "watch:lambda": "node scripts/watch-lambda.js",
-    "watch:lambda:deploy": "node scripts/watch-lambda-redeploy.js",
-    "localstack:setup-hosts": "node scripts/run-with-localstack.js setup-hosts",
-    "destroy": "cd infrastructure && node ../scripts/run-with-localstack.js destroy --all --force && docker compose down"
+    "build": "cd infrastructure && npm run build"
   },
-  "keywords": ["aws", "lambda", "cdk", "cloudformation"],
+  "keywords": [
+    "aws",
+    "lambda",
+    "cdk",
+    "cloudformation"
+  ],
   "license": "ISC",
   "devDependencies": {
     "aws-cdk": "^2.100.0",
     "aws-cdk-local": "^3.0.0"
-  }
-}
+  }}

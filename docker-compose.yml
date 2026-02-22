@@ -1,6 +1,6 @@
 # LocalStack for local AWS emulation (Lambda, API Gateway, CloudFormation, S3, IAM, etc.)
-# Start with: npm run localstack:up
-# Then: npm run bootstrap:local (first time only), npm run deploy:local
+# One-time: npm run setup
+# Deploy: npm run dev
 
 services:
   localstack:

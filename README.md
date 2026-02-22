@@ -112,54 +112,47 @@ You can run the full stack (Lambda + API Gateway) locally using [LocalStack](htt
 
 **Prerequisites:** [Docker](https://docs.docker.com/get-docker/) and Docker Compose.
 
-1. **Start LocalStack**
+1. **One-time setup** (start LocalStack, configure hosts, bootstrap CDK)
    ```bash
-   npm run localstack:up
+   npm run setup
    ```
-   This starts LocalStack in the background on port `4566`. Wait until it is ready (about 10–20 seconds). Optional: `npm run localstack:logs` to watch logs.
+   Wait until LocalStack is ready (about 20 seconds). If deploy later fails with host resolution errors, re-run `npm run setup` or add the printed lines to `/etc/hosts`.
 
-2. **Bootstrap CDK against LocalStack** (first time only)
+2. **Deploy and get API URLs**
    ```bash
-   npm run build
-   npm run bootstrap:local
+   npm run dev
    ```
+   This deploys both stacks to LocalStack and prints the Hello and Auth API URLs (and the path-style form for `curl`).
 
-3. **Deploy the stack to LocalStack**
-   ```bash
-   npm run deploy:local
-   ```
-   CDK will print an AWS-style URL; when using LocalStack, use this form instead (replace `<api-id>` with the REST API id from the deploy output or from `localstack:logs`):
-   `http://localhost:4566/restapis/<api-id>/dev/_user_request_/hello`
+3. **Optional: watch Lambda code**
+   - `npm run dev:watch` – build lambda, start file watcher in background, then deploy once.
+   - `npm run watch` – build lambda on save only (for hot-reload setups).
+   - `npm run watch:deploy` – build + redeploy on save (slower but reliable when hot-reload does not apply).
 
 4. **Call your API locally**
-   ```bash
-   # Replace <api-id> with the ID from the deploy output
-   curl http://localhost:4566/restapis/<api-id>/dev/_user_request_/hello
-   curl -X POST http://localhost:4566/restapis/<api-id>/dev/_user_request_/hello \
-     -H "Content-Type: application/json" \
-     -d '{"test": "data"}'
-   ```
+   Use the URLs printed by `npm run dev`, or the path form:  
+   `http://localhost:4566/restapis/<api-id>/dev/_user_request_/hello` (and `/auth` for Auth).
 
-5. **Stop LocalStack when finished**
+5. **Tear down**
    ```bash
-   npm run localstack:down
+   npm run destroy
    ```
 
 **Scripts:**
 
 | Script | Description |
 |--------|-------------|
-| `npm run localstack:up` | Start LocalStack (Docker) |
-| `npm run localstack:down` | Stop LocalStack |
-| `npm run localstack:logs` | Stream LocalStack logs |
-| `npm run bootstrap:local` | Bootstrap CDK for LocalStack (first time) |
-| `npm run deploy:local` | Deploy stack to LocalStack |
-| `npm run destroy:local` | Tear down stack in LocalStack |
+| `npm run setup` | One-time: start LocalStack, hosts, bootstrap |
+| `npm run dev` | Deploy to LocalStack and print API URLs |
+| `npm run dev:watch` | Build lambda, watch in background, then deploy |
+| `npm run watch` | Build lambda on save only |
+| `npm run watch:deploy` | Build + deploy on save only |
+| `npm run destroy` | Tear down stacks and stop Docker |
 
-To use a different LocalStack endpoint (e.g. custom port), set `LOCALSTACK_ENDPOINT` before running bootstrap/deploy:
+To use a different LocalStack endpoint (e.g. custom port), set `LOCALSTACK_ENDPOINT` before running setup or dev:
 
 ```bash
-LOCALSTACK_ENDPOINT=http://localhost:4567 npm run deploy:local
+LOCALSTACK_ENDPOINT=http://localhost:4567 npm run dev
 ```
 
 ## GitHub Actions Deployment
