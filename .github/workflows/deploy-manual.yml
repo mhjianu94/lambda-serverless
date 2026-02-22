@@ -47,6 +47,9 @@ jobs:
       - name: Build TypeScript
         run: npm run build
 
+      - name: Build Lambda (TypeORM users API)
+        run: npm run build:lambda
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -68,12 +71,26 @@ jobs:
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
           CDK_DEFAULT_REGION: ${{ inputs.region }}
+          LAMBDA_CODE_PATH: dist/lambda
 
       - name: CDK Deploy
         run: cd infrastructure && cdk deploy --all --require-approval never
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
           CDK_DEFAULT_REGION: ${{ inputs.region }}
+          LAMBDA_CODE_PATH: dist/lambda
+
+      - name: Run DB migrations
+        run: |
+          MIGRATION_FN=$(aws cloudformation list-exports --region ${{ inputs.region }} --query "Exports[?Name=='ApiDbService-MigrationFunctionName'].Value" --output text 2>/dev/null || true)
+          if [ -n "$MIGRATION_FN" ]; then
+            echo "Invoking migration Lambda: $MIGRATION_FN"
+            aws lambda invoke --function-name "$MIGRATION_FN" --region ${{ inputs.region }} --log-type Tail .migration-out.json
+            cat .migration-out.json
+          else
+            echo "Migration Lambda export not found (ApiDbService may not be deployed), skipping."
+          fi
+        continue-on-error: true
 
       - name: Output deployment info
         run: |

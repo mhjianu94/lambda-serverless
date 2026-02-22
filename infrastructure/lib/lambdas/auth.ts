@@ -4,7 +4,6 @@ import * as logs from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 
 export interface AuthFuncionProps {
-  /** Path to the Lambda code directory (e.g. server/lambda). */
   readonly codePath: string;
   readonly memorySize?: number;
   readonly timeout?: cdk.Duration;
@@ -26,7 +25,7 @@ export class AuthFunction extends Construct {
 
     this.function = new lambda.Function(this, 'Function', {
       runtime: lambda.Runtime.NODEJS_18_X,
-      handler: 'handler.auth',
+      handler: 'handlers/auth.handler',
       code: lambda.Code.fromAsset(props.codePath),
       description: 'Auth Lambda function',
       memorySize: props.memorySize ?? 512,

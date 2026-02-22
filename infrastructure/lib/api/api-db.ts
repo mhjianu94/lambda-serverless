@@ -3,7 +3,8 @@ import type { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 
 export interface ApiDbProps {
-  readonly dbFunction: IFunction;
+  readonly readFunction: IFunction;
+  readonly writeFunction: IFunction;
   readonly stageName?: string;
 }
 
@@ -28,12 +29,23 @@ export class ApiDb extends Construct {
       },
     });
 
-    const dbIntegration = new apigateway.LambdaIntegration(props.dbFunction, {
+    const readIntegration = new apigateway.LambdaIntegration(props.readFunction, {
+      requestTemplates: { 'application/json': '{ "statusCode": "200" }' },
+    });
+    const writeIntegration = new apigateway.LambdaIntegration(props.writeFunction, {
       requestTemplates: { 'application/json': '{ "statusCode": "200" }' },
     });
 
     const dbResource = this.api.root.addResource('db');
-    dbResource.addMethod('GET', dbIntegration);
-    dbResource.addMethod('POST', dbIntegration);
+    dbResource.addMethod('GET', readIntegration);
+    dbResource.addMethod('POST', writeIntegration);
+
+    const usersResource = this.api.root.addResource('users');
+    usersResource.addMethod('GET', readIntegration);
+    usersResource.addMethod('POST', writeIntegration);
+
+    const userByIdResource = usersResource.addResource('{id}');
+    userByIdResource.addMethod('GET', readIntegration);
+    userByIdResource.addMethod('PUT', writeIntegration);
   }
 }

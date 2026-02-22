@@ -6,17 +6,17 @@ import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 
 export interface DbBackedFunctionProps {
-  /** Path to the Lambda code directory (e.g. server/lambda). */
   readonly codePath: string;
   readonly vpc: ec2.IVpc;
   readonly securityGroups: ec2.ISecurityGroup[];
-  /** RDS Proxy endpoint hostname. */
   readonly dbProxyEndpoint: string;
-  /** Secrets Manager secret ARN for DB credentials. */
   readonly secret: secretsmanager.ISecret;
+  readonly handler?: string;
+  readonly logGroupName?: string;
   readonly memorySize?: number;
   readonly timeout?: cdk.Duration;
   readonly stage?: string;
+  readonly description?: string;
 }
 
 export class DbBackedFunction extends Construct {
@@ -26,17 +26,20 @@ export class DbBackedFunction extends Construct {
   constructor(scope: Construct, id: string, props: DbBackedFunctionProps) {
     super(scope, id);
 
+    const logGroupName = props.logGroupName ?? '/aws/lambda/db-backed-function';
+    const handler = props.handler ?? 'handlers/users-read.handler';
+
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
-      logGroupName: '/aws/lambda/db-backed-function',
+      logGroupName,
       retention: logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     this.function = new lambda.Function(this, 'Function', {
       runtime: lambda.Runtime.NODEJS_18_X,
-      handler: 'handler.db',
+      handler,
       code: lambda.Code.fromAsset(props.codePath),
-      description: 'Lambda in VPC that connects to RDS via Proxy',
+      description: props.description ?? 'Lambda in VPC that connects to RDS via Proxy',
       memorySize: props.memorySize ?? 512,
       timeout: props.timeout ?? cdk.Duration.seconds(30),
       vpc: props.vpc,

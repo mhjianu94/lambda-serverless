@@ -2,17 +2,17 @@ import * as cdk from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
-export interface VpcStackProps extends cdk.StackProps {
+export interface VpcServiceProps extends cdk.StackProps {
   /** If set, create a new VPC. If not set, defaults to creating a new VPC. */
   readonly maxAzs?: number;
 }
 
-export class VpcStack extends cdk.Stack {
+export class VpcService extends cdk.Stack {
   readonly vpc: ec2.IVpc;
   readonly lambdaSecurityGroup: ec2.ISecurityGroup;
   readonly privateSubnets: ec2.ISubnet[];
 
-  constructor(scope: Construct, id: string, props?: VpcStackProps) {
+  constructor(scope: Construct, id: string, props?: VpcServiceProps) {
     super(scope, id, props);
 
     const maxAzs = props?.maxAzs ?? 2;

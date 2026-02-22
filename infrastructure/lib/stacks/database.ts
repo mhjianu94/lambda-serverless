@@ -6,17 +6,17 @@ import { Construct } from 'constructs';
 
 const POSTGRES_PORT = 5432;
 
-export interface DatabaseStackProps extends cdk.StackProps {
+export interface DatabaseServiceProps extends cdk.StackProps {
   readonly vpc: ec2.IVpc;
   readonly lambdaSecurityGroup: ec2.ISecurityGroup;
 }
 
-export class DatabaseStack extends cdk.Stack {
+export class DatabaseService extends cdk.Stack {
   readonly dbInstance: rds.DatabaseInstance;
   readonly dbProxy: rds.DatabaseProxy;
   readonly secret: secretsmanager.ISecret;
 
-  constructor(scope: Construct, id: string, props: DatabaseStackProps) {
+  constructor(scope: Construct, id: string, props: DatabaseServiceProps) {
     super(scope, id, props);
 
     const { vpc, lambdaSecurityGroup } = props;

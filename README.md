@@ -46,7 +46,7 @@ This project contains a serverless AWS Lambda function setup using AWS CDK (Clou
 │   ├── lib/
 │   │   ├── api/                 # API Gateway constructs
 │   │   ├── lambdas/             # Lambda constructs
-│   │   └── stacks/             # HelloStack, AuthStack
+│   │   └── stacks/             # HelloService, AuthService
 │   ├── cdk.json
 │   ├── tsconfig.json
 │   └── package.json             # CDK dependencies
@@ -280,12 +280,12 @@ cdk destroy
 
 ### Modify the Stacks
 
-There are two stacks: **HelloStack** (hello Lambda + /hello API) and **AuthStack** (auth Lambda + /auth API).
+There are two main services: **HelloService** (hello Lambda + /hello API) and **AuthService** (auth Lambda + /auth API).
 
-- **HelloStack**: `infrastructure/lib/stacks/hello-stack.ts` and `lib/lambdas/hello-function.ts`, `lib/api/hello-api.ts`
-- **AuthStack**: `infrastructure/lib/stacks/auth-stack.ts` and `lib/lambdas/auth.ts`, `lib/api/auth-api.ts`
+- **HelloService**: `infrastructure/lib/stacks/hello.ts` and `lib/lambdas/hello.ts`, `lib/api/hello.ts`
+- **AuthService**: `infrastructure/lib/stacks/auth.ts` and `lib/lambdas/auth.ts`, `lib/api/auth.ts`
 
-Edit these to change Lambda configuration (memory, timeout, env vars), add API routes, or add resources (S3, DynamoDB, etc.). Deploy both with `npm run deploy` or one stack with `cdk deploy HelloStack` or `cdk deploy AuthStack`.
+Edit these to change Lambda configuration (memory, timeout, env vars), add API routes, or add resources (S3, DynamoDB, etc.). Deploy both with `npm run deploy` or one service with `cdk deploy HelloService` or `cdk deploy AuthService`.
 
 ### Change AWS Region/Account
 

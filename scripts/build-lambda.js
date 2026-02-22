@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.join(__dirname, '..');
-const src = path.join(root, 'server', 'lambda');
+const src = path.join(root, 'server');
 const dest = path.join(root, 'dist', 'lambda');
 const cdkOut = path.join(root, 'infrastructure', 'cdk.out');
 
@@ -82,14 +82,35 @@ function syncCdkOutAssets() {
       }
     }
   }
+  const sourceToSync = useTypeScriptBuild ? dest : src;
   for (const dir of lambdaAssetDirs) {
-    syncInto(src, dir);
+    syncInto(sourceToSync, dir);
     console.log('Lambda built: synced into', path.relative(root, dir));
   }
 }
 
+const lambdaPackageJson = path.join(src, 'package.json');
+const useTypeScriptBuild = fs.existsSync(lambdaPackageJson);
+
 if (fs.existsSync(dest)) emptyDir(dest);
 else fs.mkdirSync(path.dirname(dest), { recursive: true });
-copyRecursive(src, dest);
-console.log('Lambda built:', src, '->', dest);
+
+if (useTypeScriptBuild) {
+  const { execSync } = require('child_process');
+  execSync('npm install', { cwd: src, stdio: 'inherit' });
+  execSync('npm run build', { cwd: src, stdio: 'inherit' });
+  const lambdaDist = path.join(src, 'dist');
+  if (fs.existsSync(lambdaDist)) {
+    copyRecursive(lambdaDist, dest);
+  }
+  const lambdaNodeModules = path.join(src, 'node_modules');
+  if (fs.existsSync(lambdaNodeModules)) {
+    copyRecursive(lambdaNodeModules, path.join(dest, 'node_modules'));
+  }
+  console.log('Lambda built (TypeScript):', lambdaDist, '+ node_modules ->', dest);
+} else {
+  copyRecursive(src, dest);
+  console.log('Lambda built:', src, '->', dest);
+}
+
 syncCdkOutAssets();

@@ -1,0 +1,40 @@
+---
+description: Conventions for the server (Lambda handlers and app code)
+globs: server/**/*.ts, server/**/*.js
+alwaysApply: false
+---
+
+# Server
+
+This rule applies when working under `server/` (Lambda runtime code: handlers, entities, data source, migrations).
+
+## Scope
+
+- The app lives under **server/** with handlers in **server/handlers/** (one file per handler, named by what it does). Shared data source, entities, and migrations live under `server/`.
+- Each handler is its own file in `server/handlers/`; no single `handler.ts`. Align handler filenames with the `handler` field in infrastructure (e.g. `handlers/users-read.handler`, `handlers/hello.handler`).
+- Shared code (DB connection, entities, repos) lives under `server/`; avoid duplicating config or connection logic across handlers.
+
+## Conventions
+
+- Do **not** suffix files with generic names; the folder already indicates the kind of artifact (e.g. in `handlers/` use `users-read.ts`, `users-write.ts`, `hello.ts`, `auth.ts`, `migrate.ts`, not `users-read-handler.ts`).
+- Keep environment-driven config (e.g. `DB_PROXY_ENDPOINT`, `DB_SECRET_ARN`, `STAGE`) in a single place (e.g. `data-source.ts`) and import where needed.
+- Use the same Node/runtime version as declared in infrastructure (e.g. NODEJS_18_X) for compatibility with both AWS and LocalStack.
+
+## Structure (keep updated when server layout changes)
+
+```text
+server/
+  handlers/               # One file per Lambda handler, named by what it does
+    hello.ts
+    auth.ts
+    users-read.ts
+    users-write.ts
+    migrate.ts
+  data-source.ts
+  entity/
+  migrations/
+  package.json
+  tsconfig.json
+```
+
+When you add, remove, or rename files under `server/`, update this map in the rule so it stays accurate.

@@ -1,0 +1,43 @@
+---
+description: Local development and LocalStack conventions
+globs: scripts/**/*.js, docker-compose.yml, docker-compose.*.yml
+alwaysApply: false
+---
+
+# Local development and LocalStack
+
+This rule applies when writing or changing anything related to **local development** and **LocalStack** (scripts, Docker, env, deploy against local AWS).
+
+## Scope
+
+- **LocalStack**: AWS emulation via Docker; used for running CDK deploy and Lambda locally without real AWS.
+- **Scripts**: `scripts/run-with-localstack.js` (env + cdklocal), `scripts/echo-localstack-urls.js`, `scripts/watch-lambda*.js`, `scripts/build-lambda.js`.
+- **Docker**: `docker-compose.yml` defines the LocalStack service (port 4566, required services, persistence, Lambda file watcher).
+- **Env**: `EDGE_PORT`, `LOCALSTACK_REGION`, `LOCALSTACK_ENDPOINT`, `AWS_ENDPOINT_URL`, `CDK_DEFAULT_ACCOUNT`/`CDK_DEFAULT_REGION` when using LocalStack.
+
+## Conventions
+
+- When adding or changing LocalStack-related scripts or config, keep endpoint and region in sync: default region (e.g. `eu-central-1`) and `http://localhost:4566` (or `EDGE_PORT`) should match what `run-with-localstack.js` and `docker-compose.yml` expect.
+- Document one-off setup (e.g. `/etc/hosts` for `localhost.localstack.cloud`) in scripts or README so dev setup is reproducible.
+- Use `run-with-localstack.js` (or the npm scripts that call it) as the single entry point for bootstrap and deploy against LocalStack; avoid hardcoding credentials or endpoints in app code—use env vars set by the script or `.env`.
+- For Lambda code path when deploying to LocalStack, respect `LAMBDA_CODE_PATH` so the same build (e.g. `server/lambda` or `dist/lambda`) is used locally and in CI.
+
+## Structure (keep updated when scripts or Docker layout changes)
+
+```text
+scripts/
+  build-lambda.js
+  echo-localstack-urls.js
+  run-with-localstack.js
+  watch-lambda.js
+  watch-lambda-redeploy.js
+docker-compose.yml
+```
+
+## Commands (reference)
+
+- `npm run localstack:setup-hosts` – add LocalStack hosts to `/etc/hosts`.
+- `npm run dev` – deploy to LocalStack and print API URLs (after `npm run build` and optionally `npm run bootstrap:local` once).
+- `npm run destroy` – tear down LocalStack stacks and stop Docker.
+
+When you add or change scripts, docker-compose, or env usage for local/LocalStack, update the structure tree above and any README or this rule if the workflow changes.

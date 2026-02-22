@@ -1,0 +1,44 @@
+---
+description: Generic rules and conventions that apply to the whole repo
+alwaysApply: true
+---
+
+# General (whole repo)
+
+These rules apply everywhere in the repository. For domain-specific conventions, see the other rules (Infrastructure, Server, Dev).
+
+## Repo layout
+
+- **infrastructure/** – CDK stacks and constructs (see Infrastructure rule).
+- **server/** – Lambda runtime code (see Server rule).
+- **scripts/** – Build, watch, and LocalStack helpers (see Dev rule).
+- **.github/workflows/** – CI/CD (deploy to AWS or LocalStack).
+
+## Cross-cutting conventions
+
+- **Secrets and env**: Do not commit secrets or real AWS credentials. Use `.env` for local overrides and keep it gitignored; document required env vars in README or scripts.
+- **Dependencies**: Add packages in the appropriate package: root for workspace scripts, `infrastructure/` for CDK, `server/` for Lambda runtime. Run installs in the right directory so lockfiles stay correct.
+- **Naming**: Use kebab-case for file and folder names; PascalCase for classes and types; camelCase for variables and functions. Avoid generic suffixes (e.g. no `-function` or `-stack` in filenames when the folder already implies the type—see Infrastructure rule).
+- **Generated code**: Do not add comments to generated or written code (no inline comments, no file headers, no JSDoc unless the user asks). Prefer clear names and structure instead.
+- **Docs**: When adding or changing setup steps, deploy flow, or env vars, update the README so the repo stays self-explanatory.
+- **Structure trees in rules**: Whenever you add, remove, or rename files or folders in the project, update the structure tree in the corresponding `.cursor/rules/*.mdc` so it stays accurate: **infrastructure.mdc** for `infrastructure/`, **server.mdc** for `server/`, **dev.mdc** for scripts/docker if that layout changes. Do this as part of the same task, not as a follow-up.
+
+## Extracting and placing rules
+
+When executing tasks, if you infer or establish a **new convention, pattern, or rule** (from user feedback, repeated decisions, or project structure):
+
+1. **Classify it** by scope:
+   - **infrastructure.mdc** – CDK, stacks/services, lambdas, API constructs, anything under `infrastructure/`.
+   - **server.mdc** – Lambda handlers, entities, data source, migrations, anything under `server/`.
+   - **dev.mdc** – LocalStack, Docker, scripts, env, local deploy and dev workflow.
+   - **general.mdc** – Repo-wide layout, naming, secrets, docs, or anything that applies to all areas.
+
+2. **Add it to the correct rule file**: Edit the matching `.cursor/rules/*.mdc` and append (or merge) the new rule in the right section. Keep the file concise; use bullets and short examples.
+
+3. **Update structure maps**: When adding rules that describe layout, update the tree in that rule. In general, whenever you change project structure (see Cross-cutting conventions), update the relevant rule’s tree.
+
+Do not create new rule files unless the user asks; use the four existing ones. Prefer updating an existing section over adding many small sections.
+
+## When in doubt
+
+- Prefer the more specific rule: Infrastructure for `infrastructure/`, Server for `server/`, Dev for local/LocalStack. This rule is the fallback for everything else.

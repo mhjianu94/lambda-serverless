@@ -1,20 +1,20 @@
 import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { HelloFunction } from '../lambdas/hello-function';
-import { HelloApi } from '../api/hello-api';
+import { HelloFunction } from '../lambdas/hello';
+import { HelloApi } from '../api/hello';
 
-export interface HelloStackProps extends cdk.StackProps {
+export interface HelloServiceProps extends cdk.StackProps {
   readonly stage?: string;
 }
 
-export class HelloStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: HelloStackProps) {
+export class HelloService extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: HelloServiceProps) {
     super(scope, id, props);
 
     const lambdaCodePath = process.env.LAMBDA_CODE_PATH
       ? path.join(process.cwd(), '..', process.env.LAMBDA_CODE_PATH)
-      : path.join(process.cwd(), '..', 'server', 'lambda');
+      : path.join(process.cwd(), '..', 'dist', 'lambda');
     const stage = props?.stage ?? 'dev';
 
     const helloFunction = new HelloFunction(this, 'HelloFunction', {

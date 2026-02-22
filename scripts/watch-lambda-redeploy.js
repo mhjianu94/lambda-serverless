@@ -1,5 +1,5 @@
 /**
- * Watch server/lambda and on change: build then redeploy to LocalStack.
+ * Watch server/ and on change: build then redeploy to LocalStack.
  * Use this when hot-reload (mount) does not pick up changes in your environment.
  * Slower (~15–30s per save) but guarantees the Lambda response updates.
  */
@@ -7,11 +7,13 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 const root = path.join(__dirname, '..');
-const watchDir = path.join(root, 'server', 'lambda');
-const DEBOUNCE_MS = 2500;
+const watchDir = path.join(root, 'server');
+const DEBOUNCE_MS = 1500;   // wait for save to settle (batches multiple fs events from one save)
+const COOLDOWN_MS = 3500;   // after build+deploy, ignore events so we only run once per save
 
 let busy = false;
 let pending = false;
+let lastRunTime = 0;
 
 function runBuild(cb) {
   const child = spawn('node', [path.join(__dirname, 'build-lambda.js')], {
@@ -46,17 +48,20 @@ function buildAndDeploy() {
     pending = true;
     return;
   }
+  if (Date.now() - lastRunTime < COOLDOWN_MS) return; // ignore events right after a run (one run per save)
   busy = true;
   pending = false;
-  console.log('[watch] Change detected, building...');
+  console.log('[watch] Save detected, building...');
   runBuild((code) => {
     if (code !== 0) {
       busy = false;
+      lastRunTime = Date.now();
       if (pending) setTimeout(buildAndDeploy, 100);
       return;
     }
     runDeploy(() => {
       busy = false;
+      lastRunTime = Date.now();
       if (pending) setTimeout(buildAndDeploy, 100);
     });
   });
@@ -72,7 +77,7 @@ require('fs').watch(watchDir, { recursive: true }, (event, filename) => {
   }, DEBOUNCE_MS);
 });
 
-console.log('Watching', watchDir, '(build + redeploy on change). Debounce:', DEBOUNCE_MS + 'ms');
+console.log('Watching', watchDir, '(build + redeploy on save only)');
 runBuild((code) => {
   if (code === 0) {
     console.log('Initial build done. Edit a file and save to trigger deploy.');

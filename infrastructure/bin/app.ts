@@ -3,11 +3,11 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as cdk from 'aws-cdk-lib';
-import { HelloStack } from '../lib/stacks/hello-stack';
-import { AuthStack } from '../lib/stacks/auth-stack';
-import { VpcStack } from '../lib/stacks/vpc-stack';
-import { DatabaseStack } from '../lib/stacks/database-stack';
-import { ApiDbStack } from '../lib/stacks/api-db-stack';
+import { HelloService } from '../lib/stacks/hello';
+import { AuthService } from '../lib/stacks/auth';
+import { VpcService } from '../lib/stacks/vpc';
+import { DatabaseService } from '../lib/stacks/database';
+import { ApiDbService } from '../lib/stacks/api-db';
 
 const projectRoot = fs.existsSync(path.join(__dirname, '../../.env'))
   ? path.join(__dirname, '../..')
@@ -34,29 +34,29 @@ const app = new cdk.App();
 
 const stackEnv = { account, region };
 
-new HelloStack(app, 'HelloStack', {
+new HelloService(app, 'HelloService', {
   env: stackEnv,
   description: 'Hello Lambda and API Gateway',
 });
 
-new AuthStack(app, 'AuthStack', {
+new AuthService(app, 'AuthService', {
   env: stackEnv,
   description: 'Auth Lambda and API Gateway',
 });
 
-const vpcStack = new VpcStack(app, 'VpcStack', {
+const vpcStack = new VpcService(app, 'VpcService', {
   env: stackEnv,
   description: 'VPC and networking for RDS and Lambda',
 });
 
-const databaseStack = new DatabaseStack(app, 'DatabaseStack', {
+const databaseStack = new DatabaseService(app, 'DatabaseService', {
   env: stackEnv,
   description: 'RDS PostgreSQL, Secrets Manager, and RDS Proxy',
   vpc: vpcStack.vpc,
   lambdaSecurityGroup: vpcStack.lambdaSecurityGroup,
 });
 
-new ApiDbStack(app, 'ApiDbStack', {
+new ApiDbService(app, 'ApiDbService', {
   env: stackEnv,
   description: 'Lambda in VPC and API Gateway (DB via RDS Proxy)',
   vpcStack,

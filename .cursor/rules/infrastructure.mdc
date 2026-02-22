@@ -1,0 +1,53 @@
+---
+description: Naming and structure conventions for the infrastructure (CDK) project under infrastructure/
+globs: infrastructure/**/*.ts, infrastructure/**/*.md
+alwaysApply: false
+---
+
+# Infrastructure
+
+## Naming conventions
+
+- Do **not** suffix file names with generic words; the folder name already indicates the kind of artifact:
+  - In `lib/stacks/`: avoid `-stack` in filenames (e.g. use `hello.ts`, `api-db.ts`, not `hello-stack.ts`, `api-db-stack.ts`).
+  - In `lib/lambdas/`: avoid `-function` in filenames (e.g. use `hello.ts`, `db-backed.ts`, not `hello-function.ts`, `db-backed-function.ts`).
+  - In `lib/api/`: avoid redundant `-api` where the folder already implies API (e.g. `auth.ts`, `hello.ts` where it makes sense; keep `api-db.ts` as a distinct service name).
+- **Stack = service**: Treat each CDK stack as one service. **Suffix stack class names and the CDK stack logical ID with `Service`** (e.g. `HelloService`, `AuthService`, `ApiDbService`, `VpcService`, `DatabaseService`). Files live in `stacks/` and are named by service (e.g. `hello.ts` exporting `HelloService`).
+- **One stack, one service**: A stack holds all resources (Lambdas, APIs, etc.) that belong to that service. Do not mix unrelated services in a single stack.
+
+**Examples**
+
+```typescript
+// BAD: generic suffix in class and ID
+export class HelloStack extends cdk.Stack { ... }
+new HelloStack(app, 'HelloStack', { ... });
+
+// GOOD: Service suffix
+export class HelloService extends cdk.Stack { ... }
+new HelloService(app, 'HelloService', { ... });
+```
+
+## Structure map
+
+The infrastructure layout is below. When you add, remove, or rename files or folders under `infrastructure/`, update this map so it stays accurate.
+
+```text
+infrastructure/
+  bin/
+    app.ts                 # CDK app entry; instantiates services (stacks)
+  lib/
+    api/                   # API Gateway / HTTP API constructs
+      api-db.ts
+      auth.ts
+      hello.ts
+    lambdas/               # Lambda function constructs
+      auth.ts
+      db-backed.ts
+      hello.ts
+    stacks/                # CDK stacks (one stack = one service; class names end with Service)
+      api-db.ts
+      auth.ts
+      database.ts
+      hello.ts
+      vpc.ts
+```
