@@ -13,9 +13,16 @@ export interface HelloFunctionProps {
 
 export class HelloFunction extends Construct {
   readonly function: lambda.Function;
+  readonly logGroup: logs.LogGroup;
 
   constructor(scope: Construct, id: string, props: HelloFunctionProps) {
     super(scope, id);
+
+    this.logGroup = new logs.LogGroup(this, 'LogGroup', {
+      logGroupName: '/aws/lambda/hello-function',
+      retention: logs.RetentionDays.ONE_WEEK,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
 
     this.function = new lambda.Function(this, 'Function', {
       runtime: lambda.Runtime.NODEJS_18_X,
@@ -27,7 +34,7 @@ export class HelloFunction extends Construct {
       environment: {
         STAGE: props.stage ?? 'dev',
       },
-      logRetention: logs.RetentionDays.ONE_WEEK,
+      logGroup: this.logGroup,
     });
   }
 }

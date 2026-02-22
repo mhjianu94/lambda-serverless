@@ -15,9 +15,14 @@
     "localstack:down": "docker compose down",
     "localstack:logs": "docker compose logs -f localstack",
     "bootstrap:local": "cd infrastructure && node ../scripts/run-with-localstack.js bootstrap",
-    "deploy:local": "cd infrastructure && node ../scripts/run-with-localstack.js deploy --require-approval never",
-    "destroy:local": "cd infrastructure && node ../scripts/run-with-localstack.js destroy --force"
+    "localstack:setup-hosts": "node scripts/run-with-localstack.js setup-hosts",
+    "deploy:local": "cd infrastructure && node ../scripts/run-with-localstack.js deploy --all --require-approval never",
+    "destroy:local": "cd infrastructure && node ../scripts/run-with-localstack.js destroy --all --force"
   },
   "keywords": ["aws", "lambda", "cdk", "cloudformation"],
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "aws-cdk": "^2.100.0",
+    "aws-cdk-local": "^3.0.0"
+  }
 }

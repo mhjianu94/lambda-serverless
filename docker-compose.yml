@@ -15,6 +15,7 @@ services:
       - PERSISTENCE=0
       - LAMBDA_RUNTIME_ENVIRONMENT_TIMEOUT=60
     volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"  # Required for Lambda (LocalStack runs functions in containers via host Docker)
       - "./localstack-data:/var/lib/localstack"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
