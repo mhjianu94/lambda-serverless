@@ -5,8 +5,6 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 
 const POSTGRES_PORT = 5432;
-const useLocalStack = !!process.env.AWS_ENDPOINT_URL;
-const dbSubnetType = useLocalStack ? ec2.SubnetType.PRIVATE_ISOLATED : ec2.SubnetType.PRIVATE_WITH_EGRESS;
 
 export interface DatabaseServiceProps extends cdk.StackProps {
   readonly vpc: ec2.IVpc;
@@ -52,7 +50,7 @@ export class DatabaseService extends cdk.Stack {
         version: rds.PostgresEngineVersion.VER_16,
       }),
       vpc,
-      vpcSubnets: { subnetType: dbSubnetType },
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       securityGroups: [dbSecurityGroup],
       credentials: rds.Credentials.fromGeneratedSecret('postgres'),
       instanceType: ec2.InstanceType.of(
@@ -73,7 +71,7 @@ export class DatabaseService extends cdk.Stack {
       proxyTarget: rds.ProxyTarget.fromInstance(this.dbInstance),
       secrets: [this.secret],
       vpc,
-      vpcSubnets: { subnetType: dbSubnetType },
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       securityGroups: [proxySecurityGroup],
       requireTLS: false,
     });

@@ -16,22 +16,13 @@ export class VpcService extends cdk.Stack {
     super(scope, id, props);
 
     const maxAzs = props?.maxAzs ?? 2;
-    const useLocalStack = !!process.env.AWS_ENDPOINT_URL;
 
     this.vpc = new ec2.Vpc(this, 'Vpc', {
       maxAzs,
-      natGateways: useLocalStack ? 0 : 1,
-      ...(useLocalStack && {
-        subnetConfiguration: [
-          { name: 'Public', subnetType: ec2.SubnetType.PUBLIC, cidrMask: 24 },
-          { name: 'Isolated', subnetType: ec2.SubnetType.PRIVATE_ISOLATED, cidrMask: 24 },
-        ],
-      }),
+      natGateways: 1,
     });
 
-    this.privateSubnets = useLocalStack
-      ? this.vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_ISOLATED }).subnets
-      : this.vpc.privateSubnets;
+    this.privateSubnets = this.vpc.privateSubnets;
 
     this.lambdaSecurityGroup = new ec2.SecurityGroup(this, 'LambdaSg', {
       vpc: this.vpc,

@@ -18,7 +18,7 @@ This rule applies when working under `server/` (Lambda runtime code: handlers, e
 
 - Do **not** suffix files with generic names; the folder already indicates the kind of artifact (e.g. in `handlers/` use `users-read.ts`, `users-write.ts`, `hello.ts`, `auth.ts`, `migrate.ts`, not `users-read-handler.ts`).
 - Keep environment-driven config (e.g. `DB_PROXY_ENDPOINT`, `DB_SECRET_ARN`, `STAGE`) in a single place (e.g. `data-source.ts`) and import where needed.
-- Use the same Node/runtime version as declared in infrastructure (e.g. NODEJS_18_X) for compatibility with both AWS and LocalStack.
+- Use the same Node/runtime version as declared in infrastructure (e.g. NODEJS_18_X) for compatibility with AWS Lambda.
 
 ## Structure (keep updated when server layout changes)
 

@@ -11,8 +11,8 @@ These rules apply everywhere in the repository. For domain-specific conventions,
 
 - **infrastructure/** – CDK stacks and constructs (see Infrastructure rule).
 - **server/** – Lambda runtime code (see Server rule).
-- **scripts/** – Build, watch, and LocalStack helpers (see Dev rule).
-- **.github/workflows/** – CI/CD (deploy to AWS or LocalStack).
+- **scripts/** – Build helpers (see Dev rule).
+- **.github/workflows/** – CI/CD (deploy to AWS).
 
 ## Cross-cutting conventions
 
@@ -30,7 +30,7 @@ When executing tasks, if you infer or establish a **new convention, pattern, or 
 1. **Classify it** by scope:
    - **infrastructure.mdc** – CDK, stacks/services, lambdas, API constructs, anything under `infrastructure/`.
    - **server.mdc** – Lambda handlers, entities, data source, migrations, anything under `server/`.
-   - **dev.mdc** – LocalStack, Docker, scripts, env, local deploy and dev workflow.
+   - **dev.mdc** – Scripts, build, local dev workflow.
    - **general.mdc** – Repo-wide layout, naming, secrets, docs, or anything that applies to all areas.
 
 2. **Add it to the correct rule file**: Edit the matching `.cursor/rules/*.mdc` and append (or merge) the new rule in the right section. Keep the file concise; use bullets and short examples.
@@ -41,4 +41,4 @@ Do not create new rule files unless the user asks; use the four existing ones. P
 
 ## When in doubt
 
-- Prefer the more specific rule: Infrastructure for `infrastructure/`, Server for `server/`, Dev for local/LocalStack. This rule is the fallback for everything else.
+- Prefer the more specific rule: Infrastructure for `infrastructure/`, Server for `server/`, Dev for scripts and build. This rule is the fallback for everything else.

@@ -1,52 +1,29 @@
 ---
-description: Local development and LocalStack conventions
-globs: scripts/**/*.js, docker-compose.yml, docker-compose.*.yml
+description: Build and local development conventions
+globs: scripts/**/*.js
 alwaysApply: false
 ---
 
-# Local development and LocalStack
+# Build and local development
 
-This rule applies when writing or changing anything related to **local development** and **LocalStack** (scripts, Docker, env, deploy against local AWS).
+This rule applies when writing or changing scripts or the local build/deploy workflow.
 
 ## Scope
 
-- **LocalStack**: AWS emulation via Docker; used for running CDK deploy and Lambda locally without real AWS.
-- **Scripts**: `scripts/run-with-localstack.js` (env + cdklocal), `scripts/deploy-localstack-hot-reload.js` (synth + patch params + CFn deploy for hot reload), `scripts/setup.js`, `scripts/dev.js`, `scripts/dev-watch.js`, `scripts/echo-localstack-urls.js`, `scripts/watch-lambda.js`, `scripts/watch-lambda-redeploy.js`, `scripts/build-lambda.js`.
-- **Docker**: `docker-compose.yml` defines the LocalStack service (port 4566, required services, persistence, Lambda file watcher, `HOST_LAMBDA_DIR` and repo volume `.:/opt/project` for hot-reload path resolution).
-- **Env**: `EDGE_PORT`, `LOCALSTACK_REGION`, `LOCALSTACK_ENDPOINT`, `AWS_ENDPOINT_URL`, `CDK_DEFAULT_ACCOUNT`/`CDK_DEFAULT_REGION` when using LocalStack.
+- **Scripts**: `scripts/build-lambda.js` (builds server TypeScript to `dist/lambda/` for CDK Lambda asset).
+- **Build**: Lambda bundle is produced by `npm run build:lambda`; CDK in `infrastructure/` uses it (e.g. via `LAMBDA_CODE_PATH` or asset path).
 
-## Conventions
-
-- When adding or changing LocalStack-related scripts or config, keep endpoint and region in sync: default region (e.g. `eu-central-1`) and `http://localhost:4566` (or `EDGE_PORT`) should match what `run-with-localstack.js` and `docker-compose.yml` expect.
-- Document one-off setup (e.g. `/etc/hosts` for `localhost.localstack.cloud`) in scripts or README so dev setup is reproducible.
-- Use `run-with-localstack.js` (or the npm scripts that call it) as the single entry point for bootstrap and deploy against LocalStack; avoid hardcoding credentials or endpoints in app code—use env vars set by the script or `.env`.
-- For Lambda code path when deploying to LocalStack, respect `LAMBDA_CODE_PATH` so the same build (e.g. `server/lambda` or `dist/lambda`) is used locally and in CI.
-
-## Structure (keep updated when scripts or Docker layout changes)
+## Structure (keep updated when scripts change)
 
 ```text
 scripts/
   build-lambda.js
-  deploy-localstack-hot-reload.js
-  dev.js
-  dev-watch.js
-  echo-localstack-urls.js
-  run-with-localstack.js
-  setup.js
-  watch-lambda.js
-  watch-lambda-redeploy.js
-docker-compose.yml
 ```
 
 ## Commands (reference)
 
-- `npm run setup` – one-time: start LocalStack (Docker), configure hosts, bootstrap CDK. Run first; re-run to fix hosts if deploy fails.
-- `npm run dev` – deploy to LocalStack and print API URLs.
-- `npm run dev:watch` – build lambda, deploy once with hot reload, then watch server/ and sync dist to Lambda asset dir for hot reload (no redeploy).
-- `npm run watch` – build lambda on save only.
-- `npm run watch:deploy` – build + deploy on save only.
-- `npm run destroy` – tear down LocalStack stacks and stop Docker.
+- `npm run build` – build CDK (infrastructure) only.
+- `npm run build:lambda` – build Lambda bundle to `dist/lambda/`.
+- `npm run test:build` – build infra and run `cdk synth`.
 
-When you add or change scripts, docker-compose, or env usage for local/LocalStack, update the structure tree above and any README or this rule if the workflow changes.
-
-**Hot-reload:** Deploy script uses fixed dirs `infrastructure/cdk.out/hot-reload/<LogicalId>` (real dirs, not symlinks) so the file watcher sees changes. Watch scripts prefer these when present. **Troubleshooting:** If changes don't apply, check `docker inspect <lambda_container>` and `Mounts`; source should be `.../cdk.out/hot-reload/<LogicalId>`. Run `npm run dev` once after pulling if mounts still point at old symlink paths.
+Deploy to AWS from `infrastructure/` with `npx cdk deploy`. Document any new scripts or env vars in the README.
