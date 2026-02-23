@@ -11,8 +11,8 @@ This rule applies when writing or changing anything related to **local developme
 ## Scope
 
 - **LocalStack**: AWS emulation via Docker; used for running CDK deploy and Lambda locally without real AWS.
-- **Scripts**: `scripts/run-with-localstack.js` (env + cdklocal), `scripts/setup.js`, `scripts/dev.js`, `scripts/dev-watch.js`, `scripts/echo-localstack-urls.js`, `scripts/watch-lambda.js`, `scripts/watch-lambda-redeploy.js`, `scripts/build-lambda.js`.
-- **Docker**: `docker-compose.yml` defines the LocalStack service (port 4566, required services, persistence, Lambda file watcher).
+- **Scripts**: `scripts/run-with-localstack.js` (env + cdklocal), `scripts/deploy-localstack-hot-reload.js` (synth + patch params + CFn deploy for hot reload), `scripts/setup.js`, `scripts/dev.js`, `scripts/dev-watch.js`, `scripts/echo-localstack-urls.js`, `scripts/watch-lambda.js`, `scripts/watch-lambda-redeploy.js`, `scripts/build-lambda.js`.
+- **Docker**: `docker-compose.yml` defines the LocalStack service (port 4566, required services, persistence, Lambda file watcher, `HOST_LAMBDA_DIR` and repo volume `.:/opt/project` for hot-reload path resolution).
 - **Env**: `EDGE_PORT`, `LOCALSTACK_REGION`, `LOCALSTACK_ENDPOINT`, `AWS_ENDPOINT_URL`, `CDK_DEFAULT_ACCOUNT`/`CDK_DEFAULT_REGION` when using LocalStack.
 
 ## Conventions
@@ -27,6 +27,7 @@ This rule applies when writing or changing anything related to **local developme
 ```text
 scripts/
   build-lambda.js
+  deploy-localstack-hot-reload.js
   dev.js
   dev-watch.js
   echo-localstack-urls.js
@@ -47,3 +48,5 @@ docker-compose.yml
 - `npm run destroy` – tear down LocalStack stacks and stop Docker.
 
 When you add or change scripts, docker-compose, or env usage for local/LocalStack, update the structure tree above and any README or this rule if the workflow changes.
+
+**Hot-reload troubleshooting:** If code changes in dev:watch don't apply, check that the Lambda container has a bind mount: `docker inspect <lambda_container>` and look at `Mounts`. If `Mounts` is empty, the host path was not mounted (start LocalStack from repo root so `HOST_LAMBDA_DIR` is set, then redeploy).

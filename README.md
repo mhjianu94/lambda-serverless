@@ -50,6 +50,7 @@ Optional overrides (e.g. in `.env`, not committed):
 ### Troubleshooting
 
 - **`getaddrinfo ENOTFOUND ... s3.localhost`** – The bootstrap stack was created with a hostname that doesn’t resolve. Re-bootstrap using `127.0.0.1`: run `npm run destroy`, then `npm run setup`, then `npm run dev`.
+- **Hot reload not applying changes** – Ensure the Lambda container has the code dir mounted: `docker inspect <lambda_container>` and check `Mounts`. If `Mounts` is empty, LocalStack did not mount the host path (e.g. wrong path format or Docker cannot see the path). Start LocalStack from the project root so `HOST_LAMBDA_DIR` is set correctly (`docker compose up -d` from repo root), then run `npm run dev` or `npm run dev:watch` again.
 
 ### Tear down
 

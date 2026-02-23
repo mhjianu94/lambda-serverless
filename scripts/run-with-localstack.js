@@ -35,6 +35,12 @@ const args = process.argv.slice(2);
 const cmd = args[0];
 const rest = args.slice(1);
 
+const isDeploy = cmd === 'cdklocal' && rest[0] === 'deploy';
+if (useHotReload && isDeploy) {
+  const result = spawnSync('node', ['scripts/deploy-localstack-hot-reload.js'], { cwd: repoRoot, env, stdio: 'inherit' });
+  process.exit(result.status ?? 1);
+}
+
 const needsAsset = cmd === 'cdklocal' && rest.length > 0 && ['deploy', 'synth', 'diff', 'watch'].includes(rest[0]);
 if (needsAsset && !fs.existsSync(distLambda)) {
   console.log('Lambda asset dist/lambda missing; running build:lambda...');

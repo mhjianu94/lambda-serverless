@@ -26,6 +26,7 @@
     "@aws-sdk/client-cloudformation": "^3.0.0",
     "aws-cdk": "^2.100.0",
     "aws-cdk-local": "^3.0.0",
+    "awscli-local": "^0.23.0",
     "chokidar": "^3.6.0",
     "rimraf": "^6.0.0"
   }
