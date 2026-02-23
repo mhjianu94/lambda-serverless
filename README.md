@@ -31,10 +31,11 @@ LocalStack runs **Hello** and **Auth** only (no VPC, RDS, or DB-backed API). For
 - **Hot reload (no redeploy on save):**
 
   ```bash
+  npm run dev
   npm run dev:watch
   ```
 
-  Builds once, deploys once, then watches `server/`. On change it rebuilds and syncs `dist/lambda` into the mounted asset dir; LocalStack picks up changes and reloads Lambda code.
+  Run `npm run dev` once so Lambda containers get the code mount, then run `npm run dev:watch`. The watch skips redeploy if asset dirs already exist, so the same container is reused and file changes are synced into the mounted dir (LocalStack reloads code in place). If you run only `npm run dev:watch`, it will deploy once at start and then watch.
 
 - **Build only on save:** `npm run watch`
 - **Build + full deploy on save:** `npm run watch:deploy` (no hot-reload mount)
@@ -50,7 +51,9 @@ Optional overrides (e.g. in `.env`, not committed):
 ### Troubleshooting
 
 - **`getaddrinfo ENOTFOUND ... s3.localhost`** – The bootstrap stack was created with a hostname that doesn’t resolve. Re-bootstrap using `127.0.0.1`: run `npm run destroy`, then `npm run setup`, then `npm run dev`.
-- **Hot reload not applying changes** – Ensure the Lambda container has the code dir mounted: `docker inspect <lambda_container>` and check `Mounts`. If `Mounts` is empty, LocalStack did not mount the host path (e.g. wrong path format or Docker cannot see the path). Start LocalStack from the project root so `HOST_LAMBDA_DIR` is set correctly (`docker compose up -d` from repo root), then run `npm run dev` or `npm run dev:watch` again.
+- **Hot reload not applying changes** – Ensure the Lambda container has the code dir mounted: `docker inspect <lambda_container>` and check `Mounts`. The source path should be `.../infrastructure/cdk.out/hot-reload/<LogicalId>` (real directory). If you previously used symlink-based mounts, run `npm run dev` once so the stack is updated to use the fixed hot-reload dirs; then `dev:watch` will sync into those dirs and LocalStack’s file watcher can detect changes. Start LocalStack from the project root so `HOST_LAMBDA_DIR` is set (`docker compose up -d` from repo root).
+
+- **502 or “Internal server error” when calling the API (including `https://…execute-api.localhost.localstack.cloud:4566/dev/hello`)** – With hot-reload, Lambda code is mounted from the host; LocalStack can set the container’s working directory to the host path, which does not exist inside the container, so Node throws `ENOENT: uv_cwd` and the API returns 502. **Workaround:** call the API via HTTP with `Host` and avoid relying on the HTTPS URL, or invoke the function directly: `aws --endpoint-url=http://127.0.0.1:4566 lambda invoke --function-name <HelloFunctionName> --payload '{}' out.json && cat out.json`. Example: `curl -s "http://127.0.0.1:4566/dev/hello" -H "Host: <API_ID>.execute-api.localhost.localstack.cloud"` (get `<API_ID>` from stack outputs or deploy log).
 
 ### Tear down
 

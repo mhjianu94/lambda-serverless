@@ -2,7 +2,7 @@ import { APIGatewayProxyResult } from 'aws-lambda';
 
 export async function handler(): Promise<APIGatewayProxyResult> {
   const body = {
-    message: 'Hello from AWS Lambda!',
+    message: 'Hello from AWS Lambda! HOT-RELOAD-WORKS',
   };
   return {
     statusCode: 200,

@@ -23,6 +23,22 @@ console.log('Synthing with hot-reload parameters...');
 const synth = spawnSync('npx', ['cdklocal', 'synth', '--all'], { cwd: infrastructureDir, env, stdio: 'inherit' });
 if (synth.status !== 0) process.exit(synth.status ?? 1);
 if (!fs.existsSync(cdkOut)) { console.error('cdk.out not found after synth.'); process.exit(1); }
+const hotReloadDir = path.join(cdkOut, 'hot-reload');
+if (!fs.existsSync(hotReloadDir)) fs.mkdirSync(hotReloadDir, { recursive: true });
+
+function copyDirRecursive(src, dest) {
+  const stat = fs.statSync(src);
+  if (stat.isDirectory()) {
+    if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+    for (const name of fs.readdirSync(src)) {
+      copyDirRecursive(path.join(src, name), path.join(dest, name));
+    }
+  } else {
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.copyFileSync(src, dest);
+  }
+}
+
 const templateFiles = fs.readdirSync(cdkOut).filter(function(n) { return n.endsWith('.template.json'); });
 for (let t = 0; t < templateFiles.length; t++) {
   const data = JSON.parse(fs.readFileSync(path.join(cdkOut, templateFiles[t]), 'utf8'));
@@ -31,13 +47,15 @@ for (let t = 0; t < templateFiles.length; t++) {
     const res = resources[logicalId];
     if (res.Type !== 'AWS::Lambda::Function' || !res.Metadata || !res.Metadata['aws:asset:path']) continue;
     const assetPath = res.Metadata['aws:asset:path'];
-    const linkPath = path.join(cdkOut, 'asset.lambda.' + logicalId);
     const targetDir = path.join(cdkOut, assetPath);
     if (!fs.existsSync(targetDir)) continue;
+    const hotDir = path.join(hotReloadDir, logicalId);
     try {
-      if (fs.existsSync(linkPath)) fs.unlinkSync(linkPath);
-      fs.symlinkSync(assetPath, linkPath);
-    } catch (e) {}
+      if (fs.existsSync(hotDir)) fs.rmSync(hotDir, { recursive: true });
+      copyDirRecursive(targetDir, hotDir);
+    } catch (e) {
+      console.warn('hot-reload copy', logicalId, e.message);
+    }
   }
 }
 for (let i = 0; i < templateFiles.length; i++) {
@@ -52,7 +70,7 @@ for (let i = 0; i < templateFiles.length; i++) {
     const code = res.Properties.Code;
     if (code.S3Bucket !== undefined && code.S3Key !== undefined) {
       code.S3Bucket = 'hot-reload';
-      code.S3Key = '$HOST_LAMBDA_DIR/infrastructure/cdk.out/asset.lambda.' + logicalId;
+      code.S3Key = '$HOST_LAMBDA_DIR/infrastructure/cdk.out/hot-reload/' + logicalId;
       changed = true;
     }
   }

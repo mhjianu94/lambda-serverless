@@ -49,4 +49,4 @@ docker-compose.yml
 
 When you add or change scripts, docker-compose, or env usage for local/LocalStack, update the structure tree above and any README or this rule if the workflow changes.
 
-**Hot-reload troubleshooting:** If code changes in dev:watch don't apply, check that the Lambda container has a bind mount: `docker inspect <lambda_container>` and look at `Mounts`. If `Mounts` is empty, the host path was not mounted (start LocalStack from repo root so `HOST_LAMBDA_DIR` is set, then redeploy).
+**Hot-reload:** Deploy script uses fixed dirs `infrastructure/cdk.out/hot-reload/<LogicalId>` (real dirs, not symlinks) so the file watcher sees changes. Watch scripts prefer these when present. **Troubleshooting:** If changes don't apply, check `docker inspect <lambda_container>` and `Mounts`; source should be `.../cdk.out/hot-reload/<LogicalId>`. Run `npm run dev` once after pulling if mounts still point at old symlink paths.
