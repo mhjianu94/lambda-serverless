@@ -1,0 +1,19 @@
+version = 0.1
+
+[default.global.parameters]
+stack_name = "local"
+
+[default.build.parameters]
+template = "dev/template.yaml"
+cached = true
+parallel = true
+
+[default.validate.parameters]
+lint = true
+
+[default.local_start_api.parameters]
+template = "dev/template.yaml"
+warm_containers = "EAGER"
+port = 3000
+
+[default.local_invoke.parameters]

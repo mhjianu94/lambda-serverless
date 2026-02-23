@@ -10,14 +10,19 @@ This rule applies when writing or changing scripts or the local build/deploy wor
 
 ## Scope
 
-- **Scripts**: `scripts/build-lambda.js` (builds server TypeScript to `dist/lambda/` for CDK Lambda asset).
+- **Scripts**: `scripts/build-lambda.js` (builds server TypeScript to `dist/lambda/` for CDK Lambda asset; writes Makefile for SAM).
 - **Build**: Lambda bundle is produced by `npm run build:lambda`; CDK in `infrastructure/` uses it (e.g. via `LAMBDA_CODE_PATH` or asset path).
+- **Local dev**: SAM template and config in `dev/` for `sam local start-api` / `sam local invoke` (no deploy).
 
 ## Structure (keep updated when scripts change)
 
 ```text
 scripts/
   build-lambda.js
+dev/
+  template.yaml       # SAM template (all functions + one API)
+  samconfig.toml      # SAM CLI defaults (template path, port)
+  env.json.example    # Example env vars for local DB; copy to env.json (gitignored)
 ```
 
 ## Commands (reference)
@@ -25,5 +30,7 @@ scripts/
 - `npm run build` – build CDK (infrastructure) only.
 - `npm run build:lambda` – build Lambda bundle to `dist/lambda/`.
 - `npm run test:build` – build infra and run `cdk synth`.
+- `npm run local:build` – build Lambda bundle then `sam build` using `dev/template.yaml`.
+- `npm run local:start` – `sam local start-api` (port 3000). Use `--env-vars dev/env.json` for DB routes.
 
 Deploy to AWS from `infrastructure/` with `npx cdk deploy`. Document any new scripts or env vars in the README.

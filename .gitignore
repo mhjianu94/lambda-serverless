@@ -25,3 +25,7 @@ Thumbs.db
 # Environment variables
 .env
 .env.local
+
+# SAM local env (secrets)
+dev/env.json
+.aws-sam/*

@@ -1,0 +1,119 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Local development template (SAM). Deploy uses CDK from infrastructure/.
+
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Timeout: 30
+    MemorySize: 512
+    CodeUri: ../dist/lambda
+    Environment:
+      Variables:
+        STAGE: dev
+
+Resources:
+  LocalApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: local-api
+      StageName: dev
+      OpenApiVersion: '3.0.1'
+      Cors:
+        AllowMethods: "'GET,POST,PUT,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+        AllowOrigin: "'*'"
+
+  HelloFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      Handler: handlers/hello.handler
+      Events:
+        GetHello:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LocalApi
+            Path: /hello
+            Method: get
+        PostHello:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LocalApi
+            Path: /hello
+            Method: post
+
+  AuthFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      Handler: handlers/auth.handler
+      Events:
+        PostAuth:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LocalApi
+            Path: /auth
+            Method: post
+
+  UsersReadFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      Handler: handlers/users-read.handler
+      Events:
+        GetDb:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LocalApi
+            Path: /db
+            Method: get
+        GetUsers:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LocalApi
+            Path: /users
+            Method: get
+        GetUserById:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LocalApi
+            Path: /users/{id}
+            Method: get
+
+  UsersWriteFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      Handler: handlers/users-write.handler
+      Events:
+        PostDb:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LocalApi
+            Path: /db
+            Method: post
+        PostUsers:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LocalApi
+            Path: /users
+            Method: post
+        PutUserById:
+          Type: Api
+          Properties:
+            RestApiId: !Ref LocalApi
+            Path: /users/{id}
+            Method: put
+
+  MigrationFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      Handler: handlers/migrate.handler
+      Timeout: 300

@@ -17,7 +17,7 @@ interface DbSecret {
   engine?: string;
 }
 
-async function getDbCredentials(): Promise<DbSecret> {
+async function getDbCredentialsFromSecrets(): Promise<DbSecret> {
   const secretArn = process.env.DB_SECRET_ARN;
   if (!secretArn) {
     throw new Error('DB_SECRET_ARN environment variable is not set');
@@ -31,21 +31,45 @@ async function getDbCredentials(): Promise<DbSecret> {
   return JSON.parse(response.SecretString) as DbSecret;
 }
 
+function getLocalDbConfig(): { host: string; port: number; database: string; username: string; password: string } {
+  const host = process.env.DB_HOST;
+  const username = process.env.DB_USER;
+  const password = process.env.DB_PASSWORD;
+  const database = process.env.DB_NAME ?? 'postgres';
+  const port = process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432;
+  if (!host || !username || !password) {
+    throw new Error('Local DB requires DB_HOST, DB_USER, and DB_PASSWORD (optionally DB_NAME, DB_PORT)');
+  }
+  return { host, port, database, username, password };
+}
+
 export async function getDataSource(): Promise<DataSource> {
   if (dataSourcePromise) {
     return dataSourcePromise;
   }
-  const host = process.env.DB_PROXY_ENDPOINT || (await getDbCredentials()).host;
-  if (!host) {
-    throw new Error('DB_PROXY_ENDPOINT or secret host must be set');
-  }
-  const creds = await getDbCredentials();
-  const port = process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : creds.port ?? 5432;
-  const database = creds.dbname ?? 'postgres';
-  const username = creds.username;
-  const password = creds.password;
-  if (!username || !password) {
-    throw new Error('Database secret must contain username and password');
+  let host: string;
+  let port: number;
+  let database: string;
+  let username: string;
+  let password: string;
+
+  if (process.env.DB_SECRET_ARN) {
+    const creds = await getDbCredentialsFromSecrets();
+    host = process.env.DB_PROXY_ENDPOINT || creds.host ?? '';
+    port = process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : creds.port ?? 5432;
+    database = creds.dbname ?? 'postgres';
+    username = creds.username ?? '';
+    password = creds.password ?? '';
+    if (!host || !username || !password) {
+      throw new Error('Database secret must contain host, username and password');
+    }
+  } else {
+    const local = getLocalDbConfig();
+    host = local.host;
+    port = local.port;
+    database = local.database;
+    username = local.username;
+    password = local.password;
   }
 
   const ds = new DataSource({

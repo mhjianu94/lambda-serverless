@@ -60,4 +60,17 @@ if (fs.existsSync(serverNodeModules)) {
   copyRecursive(serverNodeModules, path.join(distLambda, 'node_modules'));
 }
 
+const makefile = `build-HelloFunction:
+\tcp -r . $(ARTIFACTS_DIR)
+build-AuthFunction:
+\tcp -r . $(ARTIFACTS_DIR)
+build-UsersReadFunction:
+\tcp -r . $(ARTIFACTS_DIR)
+build-UsersWriteFunction:
+\tcp -r . $(ARTIFACTS_DIR)
+build-MigrationFunction:
+\tcp -r . $(ARTIFACTS_DIR)
+`;
+fs.writeFileSync(path.join(distLambda, 'Makefile'), makefile);
+
 console.log('Lambda asset built:', distLambda);
